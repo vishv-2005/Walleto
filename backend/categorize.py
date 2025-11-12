@@ -1,42 +1,52 @@
+# backend/categorize.py
 import sys
 import os
 import json
 import traceback
 
-# ✅ Absolute path to your Categorization_Model folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, "..", "Categorization_Model")
+MODEL_SCRIPT = os.path.normpath(os.path.join(BASE_DIR, "..", "Categorization_Model", "main.py"))
 
-# Add model directory to path
-sys.path.append(MODEL_DIR)
-
-try:
-    from main import categorize_message
-except Exception as e:
-    print(json.dumps({"error": f"Failed to import model: {str(e)}"}))
-    sys.exit(1)
-
-
-def main():
+def predict_from_message(msg: str) -> dict:
+    """
+    Call the model script and return parsed JSON.
+    We'll call python main.py and send the message via stdin.
+    """
     try:
-        # Read the message passed from Node.js
-        message = sys.stdin.read().strip()
+        # Use subprocess to call the model script
+        import subprocess
 
-        if not message:
-            print(json.dumps({"error": "No message provided"}))
-            sys.exit(1)
+        # Call: python path/to/main.py and send message via stdin
+        proc = subprocess.Popen(
+            ["python", MODEL_SCRIPT],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        stdout, stderr = proc.communicate(input=msg, timeout=20)
 
-        # Use the model to categorize the message
-        category = categorize_message(message)
+        if stderr:
+            # Non-fatal: include stderr in response if something is wrong.
+            # But we prefer parsing stdout as JSON.
+            # print to stderr for debugging
+            print("Model stderr:", stderr, file=sys.stderr)
 
-        # Return result as JSON
-        print(json.dumps({"message": message, "category": category}))
-
+        try:
+            parsed = json.loads(stdout)
+            return parsed
+        except json.JSONDecodeError:
+            # Return raw output if not JSON
+            return {"raw": stdout, "stderr": stderr}
     except Exception as e:
-        err_info = traceback.format_exc()
-        print(json.dumps({"error": str(e), "trace": err_info}))
-        sys.exit(1)
+        return {"error": str(e), "trace": traceback.format_exc()}
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        # message provided as command-line argument (take whole remainder)
+        msg = " ".join(sys.argv[1:])
+    else:
+        msg = sys.stdin.read().strip()
+    out = predict_from_message(msg)
+    print(json.dumps(out))
