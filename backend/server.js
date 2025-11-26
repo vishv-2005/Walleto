@@ -8,22 +8,21 @@ app.use(bodyParser.json());
 
 // --- ROUTE: Categorize Message ---
 app.post("/categorize", (req, res) => {
-  const message = req.body.message;
-
-  if (!message) {
-    return res.status(400).json({ error: "Message is required" });
+  if (!req.body || typeof req.body !== "object") {
+    return res.status(400).json({ error: "Request body must be JSON. Set Content-Type: application/json" });
   }
 
-  // Resolve the Python script path
-  const pythonScript = path.join(__dirname, "categorize.py");
+  const message = req.body.message;
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return res.status(400).json({ error: "Message is required in JSON body and must be a non-empty string. Example: { \"message\": \"Hi\" }" });
+  }
 
-  // Spawn Python process
+  const pythonScript = path.join(__dirname, "categorize.py");
   const python = spawn("python", [pythonScript]);
 
   let result = "";
   let errorOutput = "";
 
-  // Collect Python script output
   python.stdout.on("data", (data) => {
     result += data.toString();
   });
@@ -40,6 +39,10 @@ app.post("/categorize", (req, res) => {
       if (parsed.error) {
         return res.status(500).json({ error: parsed.error });
       }
+      // If Python considers message invalid, respond 422 so frontend can handle explicitly
+      if (parsed.category === "invalid") {
+        return res.status(422).json(parsed);
+      }
       return res.json(parsed);
     } catch (err) {
       console.error("JSON parse error:", err);
@@ -51,7 +54,6 @@ app.post("/categorize", (req, res) => {
     }
   });
 
-  // Send message to Python via stdin
   python.stdin.write(message);
   python.stdin.end();
 });

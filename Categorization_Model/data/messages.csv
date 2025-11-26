@@ -132,7 +132,6 @@ Can I add HBO to my subscription?!,order
 "Hi, Which channels are included in movies package?...",inquiry
 "Hey, Start a new service at 6416 Elm St, Miami 85001 on 2025-02-06 urgent.",order
 "Hi, Cable line is damaged outside my house thanks",complaint
-"Hello, Remote not working and the box keeps restarting",complaint
 "Hi, Do you have student discounts? please.",inquiry
 "Hi, I'd like a new connection at 4856 Maple St, Dallas 77001 asap.",order
 "Hello, Remote not working and the box keeps restarting asap!",complaint
@@ -166,7 +165,6 @@ App streaming buffers every few minutes...,complaint
 Internet is down since 10:30 AM urgent,complaint
 Please upgrade my package to Basic urgent.,order
 "Hi, Order ID #5530: confirm activation asap.",order
-"Hello, Remote not working and the box keeps restarting",complaint
 "Hi, Can I add kids pack to my subscription?...",order
 I want to order Standard plan!,order
 "Hey, I want to order Basic plan asap!",order
@@ -192,7 +190,6 @@ Which channels are included in sports package? thanks!,inquiry
 "Hello, Start a new service at 4831 Pine Rd, San Francisco 77001 on 2025-05-12 asap...",order
 "Hey, Very slow speed, I'm getting only 1 Mbps thanks...",complaint
 "Hey, Billing shows extra charges for May",complaint
-"Hi, No channels after payment, please fix please.",complaint
 Is there a contract for 6 months? please...,inquiry
 "Hello, What's the data cap on Sports Max? please",inquiry
 "Hey, Internet is down since 1:00 AM urgent",complaint
@@ -227,7 +224,6 @@ Billing shows extra charges for June,complaint
 "Hi, How long does installation take?...",inquiry
 "Hello, No channels after payment, please fix please",complaint
 "Hello, Billing shows extra charges for April please",complaint
-"Hey, Place an order for international channels package please...",order
 What are the prices for Gigabit plan? asap,inquiry
 "Hi, Which channels are included in family package? urgent.",inquiry
 "Hey, Remote not working and the box keeps restarting thanks",complaint
@@ -241,14 +237,12 @@ Billing shows extra charges for April urgent,complaint
 I want to order Fiber 500 plan urgent.,order
 Do you service 94107?.,inquiry
 Can I pause service while I'm away? please!,inquiry
-"Hello, Please upgrade my package to Fiber 500!",order
 "Hey, My TV signal keeps dropping please.",complaint
 "Hey, I'd like a new connection at 4573 Cedar Blvd, New York 77001 asap!",order
 "Hello, I'd like a new connection at 6926 Elm St, San Francisco 60601",order
 "Hi, Do you offer weekend installation?",inquiry
 "Hello, Very slow speed, I'm getting only 5 Mbps thanks...",complaint
 "Hello, Start a new service at 1669 Pine Rd, Phoenix 10001 on 2025-04-27 please...",order
-"Hi, Can I pause service while I'm away? please...",inquiry
 "Hello, Sign me up for Basic with sports pack thanks.",order
 "Hello, Is there a contract for 6 months? asap.",inquiry
 "Hi, Can I pause service while I'm away? urgent...",inquiry
@@ -285,7 +279,6 @@ Sign me up for Standard with HBO,order
 "Hello, I'd like a new connection at 5155 Cedar Blvd, San Francisco 75001 urgent.",order
 "Hey, Which channels are included in movies package?...",inquiry
 "Hello, Very slow speed, I'm getting only 5 Mbps urgent...",complaint
-"Hello, Do you have student discounts? asap...",inquiry
 "Hi, Do you offer weekend installation? thanks...",inquiry
 Do you have student discounts?,inquiry
 Billing shows extra charges for May urgent...,complaint
@@ -309,7 +302,6 @@ I'd like to order a set-top box for office urgent.,order
 "Hey, Do you have student discounts? thanks!",inquiry
 "Hello, I want to order Gigabit plan asap!",order
 "Hello, Do you offer weekend installation?.",inquiry
-App streaming buffers every few minutes...,complaint
 Frequent outages in my area 10001 asap!,complaint
 "No channels after payment, please fix...",complaint
 "Hi, Place an order for news channels package urgent.",order
@@ -340,7 +332,6 @@ Sign me up for Standard with 4K DVR!,order
 Order ID #4603: confirm activation please!,order
 "Hello, Cable line is damaged outside my house",complaint
 Place an order for news channels package asap.,order
-How long does installation take? please.,inquiry
 "Hello, What's the data cap on Basic? urgent.",inquiry
 "Hello, Can I add kids pack to my subscription? thanks...",order
 Cable line is damaged outside my house thanks,complaint
@@ -371,7 +362,6 @@ How long does installation take? asap,inquiry
 "Hey, Can I pause service while I'm away? asap.",inquiry
 "Hey, Place an order for family channels package urgent.",order
 Do you service 75001? please!,inquiry
-"Hello, Technician didn't arrive for the appointment urgent.",complaint
 "Hey, Place an order for family channels package asap.",order
 "Hey, How long does installation take? thanks!",inquiry
 "Hi, Do you service 60601? asap",inquiry
@@ -393,7 +383,6 @@ Remote not working and the box keeps restarting thanks!,complaint
 "Hello, Technician didn't arrive for the appointment asap",complaint
 "Hello, How long does installation take? asap!",inquiry
 "Hello, Cable line is damaged outside my house.",complaint
-"Hey, No channels after payment, please fix urgent",complaint
 "Hi, What are the prices for Basic plan? thanks",inquiry
 "Very slow speed, I'm getting only 100 Mbps asap.",complaint
 "Hello, Cable line is damaged outside my house please!",complaint
@@ -405,7 +394,6 @@ App streaming buffers every few minutes,complaint
 "Hi, Frequent outages in my area 85001 urgent...",complaint
 "Hey, Very slow speed, I'm getting only 25 Mbps thanks",complaint
 "Hello, Do you offer weekend installation? urgent.",inquiry
-What is the early termination fee? please.,inquiry
 "Hey, Cable line is damaged outside my house urgent.",complaint
 "Hello, Is there a contract for 6 months? thanks.",inquiry
 "Hi, Place an order for movies channels package",order
@@ -447,14 +435,11 @@ Do you have student discounts? asap,inquiry
 Can I pause service while I'm away? thanks!,inquiry
 "Hey, Technician didn't arrive for the appointment thanks...",complaint
 "Hey, I want to order Standard plan asap...",order
-"Hi, Frequent outages in my area 77001 urgent...",complaint
 "Hi, Can I pause service while I'm away? urgent!",inquiry
 "Hi, Frequent outages in my area 60601 please!",complaint
 "Hello, What are the prices for Sports Max plan?...",inquiry
-"Hello, Do you have student discounts? asap...",inquiry
 "Hello, How long does installation take? urgent",inquiry
 "Hi, Can I add sports pack to my subscription? urgent",order
-"Hello, Which channels are included in news package? asap.",inquiry
 "Hello, Please upgrade my package to Premium please...",order
 "Hey, Order ID #7653: confirm activation asap...",order
 Do you have student discounts? please,inquiry
@@ -483,7 +468,6 @@ Remote not working and the box keeps restarting urgent...,complaint
 "Start a new service at 7761 Pine Rd, Phoenix 60601 on 2025-01-30!",order
 "Hello, Do you offer weekend installation? urgent...",inquiry
 "Hey, Very slow speed, I'm getting only 50 Mbps.",complaint
-What is the early termination fee? please,inquiry
 "Hello, Is there a contract for 12 months?...",inquiry
 "Schedule installation for 2025-05-27 at 7926 Maple St, New York 60601 urgent.",order
 "Hey, Schedule installation for 2025-01-03 at 4454 Maple St, Chicago 85001 thanks...",order
@@ -498,7 +482,6 @@ What is the early termination fee? thanks.,inquiry
 Do you have student discounts? thanks...,inquiry
 "Hi, Billing shows extra charges for January asap.",complaint
 "Hello, Frequent outages in my area 77001 thanks!",complaint
-"Hello, Can I pause service while I'm away?!",inquiry
 Cable line is damaged outside my house please,complaint
 "Hello, Can I add kids pack to my subscription? please.",order
 "Hi, Remote not working and the box keeps restarting urgent!",complaint
@@ -551,8 +534,6 @@ Do you offer weekend installation? please...,inquiry
 "Hey, Billing shows extra charges for December asap...",complaint
 "Hey, I'd like a new connection at 9837 Maple St, Houston 75001 please.",order
 "Hey, I'd like a new connection at 2409 Pine Rd, New York 10001 urgent",order
-"Hello, Is there a contract for 6 months? urgent...",inquiry
-"Hello, How long does installation take? thanks!",inquiry
 "Hello, Order ID #7518: confirm activation urgent",order
 Can I add international pack to my subscription?.,order
 "Hey, Which channels are included in news package? urgent...",inquiry
@@ -560,7 +541,6 @@ Can I add international pack to my subscription?.,order
 "Hi, Do you service 60601? please",inquiry
 I'd like to order a set-top box for basement please!,order
 "Hi, Do you offer weekend installation? urgent",inquiry
-"Hi, Frequent outages in my area 60601 please!",complaint
 Can I pause service while I'm away? please...,inquiry
 "Hey, Which channels are included in international package?",inquiry
 "Hey, Very slow speed, I'm getting only 10 Mbps asap.",complaint
@@ -573,7 +553,6 @@ Can I pause service while I'm away? please...,inquiry
 "Hi, What's the data cap on Gigabit? asap",inquiry
 Which channels are included in international package? asap...,inquiry
 Can I add HBO to my subscription? asap.,order
-"Hey, Technician didn't arrive for the appointment thanks!",complaint
 "Hey, Can I pause service while I'm away? urgent!",inquiry
 "Hey, Can I add sports pack to my subscription?.",order
 "Hello, What are the prices for Fiber 500 plan?!",inquiry
@@ -597,7 +576,6 @@ Place an order for movies channels package please.,order
 "Hey, Technician didn't arrive for the appointment thanks.",complaint
 "Hello, Place an order for movies channels package please.",order
 "Hey, No channels after payment, please fix!",complaint
-"No channels after payment, please fix thanks...",complaint
 "Hey, I'd like to order a set-top box for office please...",order
 "Hello, How long does installation take? thanks...",inquiry
 "Hello, Place an order for international channels package asap",order
@@ -606,20 +584,17 @@ Place an order for movies channels package please.,order
 Can I pause service while I'm away? thanks.,inquiry
 "Hey, I want to order Basic plan thanks...",order
 "Hello, Sign me up for Basic with sports pack urgent...",order
-"Hello, Technician didn't arrive for the appointment please.",complaint
 Is there a contract for 6 months? thanks...,inquiry
 Do you service 94107?,inquiry
 "Hi, Is there a contract for 24 months? asap!",inquiry
 "Hi, Remote not working and the box keeps restarting urgent",complaint
 "Hello, I'd like a new connection at 917 Maple St, Dallas 10001 thanks",order
 "Hi, Internet is down since 11:30 PM urgent!",complaint
-Remote not working and the box keeps restarting.,complaint
 Cable line is damaged outside my house asap...,complaint
 Is there a contract for 12 months? please...,inquiry
 "Hey, I'd like a new connection at 7750 Oak Ave, Houston 85001",order
 Is there a contract for 12 months? thanks.,inquiry
 "Hi, Sign me up for Gigabit with international pack asap!",order
-Do you have student discounts? urgent...,inquiry
 "Hello, What's the data cap on Gigabit? asap.",inquiry
 What's the data cap on Sports Max? please,inquiry
 "Hey, My TV signal keeps dropping please!",complaint
@@ -638,7 +613,6 @@ Which channels are included in international package?,inquiry
 "Hi, Place an order for family channels package please",order
 "Hello, Technician didn't arrive for the appointment thanks!",complaint
 "Hi, Is there a contract for 24 months? urgent",inquiry
-"Hello, Technician didn't arrive for the appointment!",complaint
 "Hello, Which channels are included in movies package? please.",inquiry
 "Hi, Please upgrade my package to Premium urgent!",order
 "Hi, I'd like to order a set-top box for office asap",order
@@ -660,11 +634,9 @@ Do you offer weekend installation? thanks...,inquiry
 "Hello, Do you offer weekend installation? urgent!",inquiry
 "Hi, Do you have student discounts? urgent",inquiry
 "Hi, What's the data cap on Premium?...",inquiry
-"Hello, Which channels are included in family package?...",inquiry
 "Hello, Please upgrade my package to Sports Max!",order
 Can I pause service while I'm away?...,inquiry
 "I'd like a new connection at 432 Oak Ave, San Francisco 33101 asap...",order
-"Hey, What is the early termination fee? asap.",inquiry
 "Hey, Remote not working and the box keeps restarting thanks...",complaint
 "Hi, Schedule installation for 2025-05-14 at 1397 Elm St, New York 75001 asap",order
 Technician didn't arrive for the appointment urgent,complaint
@@ -674,16 +646,12 @@ Technician didn't arrive for the appointment urgent,complaint
 "Hello, My TV signal keeps dropping urgent",complaint
 Do you have student discounts? urgent.,inquiry
 "Hello, I want to order Sports Max plan please...",order
-"Hey, Which channels are included in international package?",inquiry
 "Hi, Please upgrade my package to Sports Max urgent.",order
 Order ID #2738: confirm activation asap!,order
 "Hi, What is the early termination fee? asap!",inquiry
-"Hey, My TV signal keeps dropping asap!",complaint
-"Hi, My TV signal keeps dropping asap.",complaint
 Remote not working and the box keeps restarting asap...,complaint
 "Hey, App streaming buffers every few minutes asap",complaint
 What's the data cap on Standard? asap.,inquiry
-"Hi, I'd like to order a set-top box for living room thanks.",order
 "Hey, Very slow speed, I'm getting only 100 Mbps thanks!",complaint
 Internet is down since 4:30 PM please!,complaint
 "Hello, What is the early termination fee? urgent...",inquiry
@@ -694,10 +662,8 @@ Can I add sports pack to my subscription? urgent,order
 "Hi, I'd like a new connection at 9043 Pine Rd, Miami 10001 thanks!",order
 "Hey, No channels after payment, please fix thanks...",complaint
 "Hey, How long does installation take? asap!",inquiry
-"Hello, Very slow speed, I'm getting only 200 Mbps urgent...",complaint
 "Hi, No channels after payment, please fix asap",complaint
 Is there a contract for 12 months? please,inquiry
-Do you have student discounts? asap!,inquiry
 "Hello, Start a new service at 1113 Pine Rd, San Francisco 10001 on 2025-05-29 asap...",order
 "Hello, My TV signal keeps dropping thanks!",complaint
 "Hello, Schedule installation for 2025-04-18 at 212 Elm St, Dallas 75001 asap",order
@@ -709,23 +675,18 @@ Is there a contract for 12 months? urgent,inquiry
 "Hello, Do you have student discounts? asap",inquiry
 "Hi, Can I pause service while I'm away? asap.",inquiry
 "Hi, I'd like to order a set-top box for bedroom!",order
-"Hey, Cable line is damaged outside my house urgent!",complaint
-"Hi, Do you have student discounts? thanks...",inquiry
 "Hi, Cable line is damaged outside my house urgent...",complaint
 Place an order for international channels package please!,order
 "Hey, Start a new service at 3648 Elm St, New York 94107 on 2025-05-15...",order
-How long does installation take?,inquiry
 I want to order Fiber 500 plan thanks.,order
 "Hi, Sign me up for Gigabit with international pack...",order
 "Hello, No channels after payment, please fix urgent...",complaint
-Do you offer weekend installation? please...,inquiry
 Frequent outages in my area 94107 urgent!,complaint
 I want to order Standard plan urgent,order
 Billing shows extra charges for May,complaint
 "Hello, Do you have student discounts? urgent",inquiry
 Can I add HBO to my subscription? urgent...,order
 "Hi, I want to order Premium plan please.",order
-Cable line is damaged outside my house thanks,complaint
 "Hi, No channels after payment, please fix asap...",complaint
 Frequent outages in my area 77001 please...,complaint
 "Hello, Which channels are included in international package? thanks...",inquiry
@@ -735,7 +696,6 @@ Internet is down since 4:30 AM,complaint
 Is there a contract for 24 months? asap!,inquiry
 What is the early termination fee?,inquiry
 "Hi, Cable line is damaged outside my house asap...",complaint
-What is the early termination fee? please.,inquiry
 "Hey, Is there a contract for 12 months? urgent!",inquiry
 "Hi, Do you have student discounts? thanks!",inquiry
 What's the data cap on Basic?.,inquiry
@@ -749,8 +709,6 @@ Place an order for sports channels package urgent!,order
 "Hi, Please upgrade my package to Basic asap...",order
 "Hey, Is there a contract for 12 months? thanks.",inquiry
 Is there a contract for 6 months? asap.,inquiry
-Place an order for movies channels package asap,order
-"Hi, Can I pause service while I'm away? asap!",inquiry
 "Hi, Frequent outages in my area 33101 asap.",complaint
 I'd like to order a set-top box for office please,order
 "Hi, Is there a contract for 24 months? thanks...",inquiry
@@ -763,13 +721,10 @@ Cable line is damaged outside my house please...,complaint
 I'd like to order a set-top box for living room...,order
 "Hello, How long does installation take? please!",inquiry
 "Hey, What's the data cap on Premium? please.",inquiry
-"Hello, How long does installation take? urgent",inquiry
 Sign me up for Standard with HBO.,order
 "Hey, Which channels are included in sports package?.",inquiry
 "Hello, Do you service 77001? thanks",inquiry
-"Hey, No channels after payment, please fix asap.",complaint
 "Hey, Place an order for family channels package urgent",order
-Remote not working and the box keeps restarting urgent,complaint
 "Hello, I'd like to order a set-top box for basement thanks...",order
 "Hello, No channels after payment, please fix thanks...",complaint
 What is the early termination fee? urgent...,inquiry
@@ -783,13 +738,11 @@ Can I add HBO to my subscription?.,order
 "Hello, Is there a contract for 24 months? thanks...",inquiry
 "Hi, Do you have student discounts? please!",inquiry
 "Hey, Schedule installation for 2025-06-04 at 9074 Oak Ave, Miami 33101 please.",order
-"Hey, My TV signal keeps dropping please.",complaint
 "Hello, What are the prices for Standard plan? thanks",inquiry
 "Hi, Frequent outages in my area 60601 thanks",complaint
 "Hey, Cable line is damaged outside my house thanks.",complaint
 "Hello, What's the data cap on Premium?!",inquiry
 "Hello, What is the early termination fee?!",inquiry
-"Hello, No channels after payment, please fix urgent...",complaint
 "Hey, Start a new service at 7909 Cedar Blvd, Miami 75001 on 2025-06-28 please!",order
 "Hey, Schedule installation for 2025-02-12 at 7845 Cedar Blvd, Phoenix 77001 thanks...",order
 "Hi, Cable line is damaged outside my house!",complaint
@@ -798,23 +751,16 @@ Can I add HBO to my subscription?.,order
 "Hey, What are the prices for Standard plan? urgent!",inquiry
 "Hi, Sign me up for Premium with kids pack...",order
 Can I pause service while I'm away? please,inquiry
-"Hey, My TV signal keeps dropping please.",complaint
 "Hi, Can I add multi-room DVR to my subscription? please!",order
-"Hey, Can I pause service while I'm away? please",inquiry
 "Hello, Cable line is damaged outside my house please",complaint
 Is there a contract for 12 months?...,inquiry
-"Hi, Do you offer weekend installation? urgent",inquiry
 "Hi, Please upgrade my package to Standard asap!",order
 "Hey, Technician didn't arrive for the appointment urgent",complaint
 "Very slow speed, I'm getting only 1 Mbps asap.",complaint
-Is there a contract for 12 months? asap...,inquiry
 "Hello, Is there a contract for 24 months? asap.",inquiry
-"Hey, No channels after payment, please fix thanks...",complaint
-Remote not working and the box keeps restarting please...,complaint
 "Schedule installation for 2025-05-12 at 5643 Oak Ave, Chicago 85001 urgent...",order
 "Hello, App streaming buffers every few minutes.",complaint
 "Hello, Sign me up for Basic with international pack asap!",order
-"Hi, Please upgrade my package to Standard please",order
 "Hi, Billing shows extra charges for May thanks.",complaint
 "Hi, Order ID #3461: confirm activation asap",order
 "Hey, Place an order for movies channels package thanks!",order
@@ -842,17 +788,13 @@ Can I add kids pack to my subscription? thanks,order
 "Hi, Is there a contract for 6 months? please",inquiry
 "Hi, Internet is down since 8:00 AM please!",complaint
 "Hey, Internet is down since 7:00 AM",complaint
-"Hi, Frequent outages in my area 94107!",complaint
 "Hello, Order ID #8025: confirm activation!",order
 "Hi, Cable line is damaged outside my house asap!",complaint
 "Hi, Do you service 94107?.",inquiry
 "Hey, No channels after payment, please fix...",complaint
 "Hey, Place an order for sports channels package please...",order
 "Hello, What's the data cap on Standard? please.",inquiry
-"Hey, How long does installation take? asap",inquiry
-"Hello, Cable line is damaged outside my house please!",complaint
 "Hi, Start a new service at 3736 Cedar Blvd, New York 75001 on 2025-02-09 thanks",order
-Can I pause service while I'm away? thanks!,inquiry
 What is the early termination fee? thanks!,inquiry
 "Hey, I'd like to order a set-top box for basement",order
 Order ID #9447: confirm activation...,order
@@ -862,7 +804,6 @@ I want to order Standard plan please.,order
 "Hi, Very slow speed, I'm getting only 50 Mbps...",complaint
 "Hi, I'd like a new connection at 5775 Pine Rd, Phoenix 33101...",order
 "Hello, Technician didn't arrive for the appointment asap...",complaint
-"Hey, Remote not working and the box keeps restarting thanks",complaint
 Frequent outages in my area 33101 asap...,complaint
 How long does installation take? thanks!,inquiry
 "Hello, Is there a contract for 24 months?.",inquiry
@@ -876,7 +817,6 @@ Sign me up for Fiber 500 with 4K DVR urgent.,order
 "Hey, Is there a contract for 6 months? thanks",inquiry
 "Hello, Start a new service at 2388 Elm St, New York 33101 on 2025-01-18 thanks!",order
 "Hi, What are the prices for Sports Max plan?!",inquiry
-"Hello, My TV signal keeps dropping urgent...",complaint
 "Hi, What's the data cap on Fiber 500? urgent",inquiry
 "Hey, Order ID #9008: confirm activation urgent.",order
 "Hey, What is the early termination fee? urgent...",inquiry
@@ -884,18 +824,172 @@ Sign me up for Fiber 500 with 4K DVR urgent.,order
 "Hi, Frequent outages in my area 10001 urgent!",complaint
 "Hi, No channels after payment, please fix thanks!",complaint
 "Hey, Schedule installation for 2025-04-16 at 8438 Maple St, New York 77001 asap!",order
-"Hello, What is the early termination fee? please.",inquiry
 "Hello, Can I add international pack to my subscription? asap...",order
 What are the prices for Gigabit plan?!,inquiry
 Is there a contract for 12 months? thanks!,inquiry
 "Hey, Can I pause service while I'm away?!",inquiry
 "Hello, Do you service 85001?.",inquiry
 "Hey, Please upgrade my package to Standard please.",order
-"Hey, Frequent outages in my area 85001 asap",complaint
 "Hey, What's the data cap on Fiber 500? please!",inquiry
 "Hey, App streaming buffers every few minutes thanks!",complaint
-"Hello, Do you have student discounts? please!",inquiry
 Internet is down since 8:45 PM please...,complaint
 "Hey, Can I add multi-room DVR to my subscription? thanks!",order
 "Hey, Do you service 10001? asap...",inquiry
 "Hey, Cable line is damaged outside my house.",complaint
+What are your business hours?,inquiry
+When will my order be delivered?,inquiry
+How can I track my package?,inquiry
+Do you offer international shipping?,inquiry
+What payment methods do you accept?,inquiry
+Is this item in stock?,inquiry
+Can I change my delivery address?,inquiry
+What's your return policy?,inquiry
+How do I cancel my order?,inquiry
+Are there any discounts available?,inquiry
+What's included in the basic package?,inquiry
+How do I create an account?,inquiry
+Can I get a refund?,inquiry
+What's the warranty on this product?,inquiry
+Do you have a physical store?,inquiry
+How do I contact customer service?,inquiry
+What's the estimated delivery time?,inquiry
+Can I modify my order?,inquiry
+What's your privacy policy?,inquiry
+How do I reset my password?,inquiry
+Could you tell me more about this product?,inquiry
+Would it be possible to get a discount?,inquiry
+Might you have this in a different color?,inquiry
+I was wondering about your return process?,inquiry
+Can you explain how the warranty works?,inquiry
+What's the difference between the basic and premium plans?,inquiry
+Could you clarify your shipping policy?,inquiry
+I'd like to know more about your services,inquiry
+What are the terms and conditions?,inquiry
+How does your loyalty program work?,inquiry
+I want to order a large pizza,order
+Please sign me up for the premium plan,order
+I'd like to schedule a service appointment,order
+Add this to my cart,order
+I want to purchase the new iPhone,order
+Book me a table for two at 7pm,order
+I need to upgrade my subscription,order
+Please process my return,order
+I want to cancel my subscription,order
+Place an order for delivery,order
+Sign me up for the newsletter,order
+I'd like to make a reservation,order
+Please send me a catalog,order
+I want to buy this product,order
+Add this to my order,order
+I need to change my order,order
+Please confirm my purchase,order
+I'd like to pre-order the new model,order
+Process my payment,order
+I want to place a bulk order,order
+Please ship this to my home address,order
+I'd like to proceed with the checkout,order
+Please bill my credit card,order
+I want to schedule a delivery for tomorrow,order
+Please add this item to my existing order,order
+I need to place a corporate order,order
+Please process this as a gift order,order
+I want to order a replacement part,order
+Please send me a quote for 100 units,order
+I'd like to make a special order,order
+"I absolutely hate this service, it's the worst!",complaint
+"This is completely unacceptable, I'm very disappointed.",complaint
+I'm extremely frustrated with your terrible service.,complaint
+"The quality is absolutely awful, never again!",complaint
+I'm so angry about this horrible experience.,complaint
+"This is ridiculous, I can't believe how bad this is.",complaint
+I'm extremely dissatisfied with your service.,complaint
+This is the worst experience I've ever had.,complaint
+"I absolutely love your service, it's amazing!",inquiry
+"This is the best experience I've ever had, thank you!",inquiry
+"I'd love to order your premium package, it's fantastic!",order
+"Your service is outstanding, can't wait to recommend it!",inquiry
+I love your products but the delivery was late.,complaint
+Great quality but way too expensive for what you get.,complaint
+The customer service was excellent but the product broke quickly.,complaint
+"Oh great, another day without my order.",complaint
+"Wow, I'm so impressed with how late this is.",complaint
+"Because what I wanted was a broken product, thanks!",complaint
+I'm so grateful for your excellent service!,inquiry
+Thank you for the wonderful experience.,inquiry
+I'd love to order another one of these amazing products!,order
+I'm sorry to say I'm quite disappointed with my purchase.,complaint
+I was really hoping for better quality than this.,complaint
+"This isn't quite what I was expecting, to be honest.",complaint
+"I'm absolutely thrilled with my purchase, when can I order more?",inquiry
+"This is exactly what I was looking for, how do I get another?",inquiry
+You've made me a customer for life with this service!,inquiry
+"I need this fixed immediately, this is completely unacceptable!",complaint
+Urgent: Can I get this delivered by tomorrow? It's very important!,order
+Quick question: What's your return policy? Need to know ASAP!,inquiry
+"I'm not sure I understand how this works, can you explain?",inquiry
+"The instructions were unclear, can you help me with this?",inquiry
+"I'm so sorry, but I think there's been a mistake with my order.",complaint
+"I hate to complain, but I'm not satisfied with my purchase.",complaint
+"I can't wait to try out your service, it looks amazing!",inquiry
+This is exactly what I've been looking for! How do I order?,order
+"I had such high hopes for this, but I'm really disappointed.",complaint
+"This doesn't live up to the hype at all, I want my money back.",complaint
+"Thank you so much for your help, I really appreciate it!",inquiry
+"I'm so happy with my purchase, can I order another one?",order
+"I've had nothing but problems with this service, I'm at my wit's end!",complaint
+"This is the third time I've had to contact support, fix this now!",complaint
+"I'm really interested in your service, can you tell me more?",inquiry
+How does this compare to your other products?,inquiry
+I'm so excited to place my first order with you!,order
+"I'd love to order your premium package, it looks amazing!",order
+"I'm really disappointed with my last order, but I'd like to give it another try.",order
+"I'm really impressed with what I've seen so far, can you tell me more?",inquiry
+"I'm a bit confused about your pricing, can you clarify?",inquiry
+I'm absolutely furious about the poor service I received!,complaint
+This is completely unacceptable and needs to be fixed immediately!,complaint
+I'm furious about how bad this is.,complaint
+This is the most frustrating thing ever.,complaint
+I can't stand how poor the quality is.,complaint
+I'm thoroughly disappointed with everything.,complaint
+"This is beyond terrible, I'm shocked.",complaint
+I'm so upset with this horrible service.,complaint
+"This is completely ridiculous, I'm done.",complaint
+I'm extremely unhappy with this situation.,complaint
+"The service is shockingly bad, I'm appalled.",complaint
+"I'm beyond disappointed, this is unacceptable.",complaint
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
