@@ -1,42 +1,32 @@
-# backend/categorize.py
-import sys
-import os
-import json
-import traceback
+# backend/categorize.py - robust wrapper for model inference
+import sys, os, json, subprocess, traceback
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_SCRIPT = os.path.normpath(os.path.join(BASE_DIR, "..", "Categorization_Model", "main.py"))
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_SCRIPT = (BASE_DIR.parent / "CatMod" / "predict.py").resolve()
+PY = sys.executable or "python"
 
-def predict_from_message(msg: str) -> dict:
-    """
-    Call the model script and return parsed JSON.
-    We'll call python main.py and send the message via stdin.
-    """
+def predict_from_message(msg: str, timeout: int = 10) -> dict:
     try:
-        # Use subprocess to call the model script
-        import subprocess
+        if not MODEL_SCRIPT.exists():
+            return {"error": f"Model script not found: {MODEL_SCRIPT}"}
 
-        # Call: python path/to/main.py and send message via stdin
-        proc = subprocess.Popen(
-            ["python", MODEL_SCRIPT],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        stdout, stderr = proc.communicate(input=msg, timeout=20)
+        proc = subprocess.Popen([PY, str(MODEL_SCRIPT)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            stdout, stderr = proc.communicate(msg, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return {"error": "Model script timeout"}
 
-        if stderr:
-            # Non-fatal: include stderr in response if something is wrong.
-            # But we prefer parsing stdout as JSON.
-            # print to stderr for debugging
-            print("Model stderr:", stderr, file=sys.stderr)
+        # Include stderr for debugging
+        if stderr and stderr.strip():
+            # attach stderr to result so Node can log it
+            pass
 
         try:
             parsed = json.loads(stdout)
             return parsed
-        except json.JSONDecodeError:
-            # Return raw output if not JSON
+        except Exception:
             return {"raw": stdout, "stderr": stderr}
     except Exception as e:
         return {"error": str(e), "trace": traceback.format_exc()}
@@ -44,9 +34,8 @@ def predict_from_message(msg: str) -> dict:
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        # message provided as command-line argument (take whole remainder)
         msg = " ".join(sys.argv[1:])
     else:
         msg = sys.stdin.read().strip()
     out = predict_from_message(msg)
-    print(json.dumps(out))
+    print(json.dumps(out, ensure_ascii=False))
