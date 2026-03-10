@@ -3,13 +3,14 @@
 predict.py  (non-interactive)
 Reads message via --message or stdin, loads a saved model, predicts category,
 and prints a single JSON object to stdout.
+Categories: order, inquiry, complaint, feedback, invalid
 """
 import argparse
 import json
 import os
-import sys
 import re
 import string
+import sys
 from pathlib import Path
 
 import joblib
@@ -28,7 +29,7 @@ def clean_text(text: str) -> str:
     if not isinstance(text, str):
         text = str(text)
     t = text.lower().strip()
-    t = t.replace("’", "'").replace("“", '"').replace("”", '"')
+    t = t.replace("\u2019", "'").replace("\u201c", '"').replace("\u201d", '"')
     t = t.translate(str.maketrans("", "", string.punctuation))
     t = re.sub(r"\s+", " ", t)
     return t
@@ -36,12 +37,26 @@ def clean_text(text: str) -> str:
 
 def rule_based_label(text: str):
     t = text.lower()
-    # high-precision rules
-    if any(w in t for w in ["damag", "broken", "disappoint", "not good", "bad", "spoiled", "mold", "leak"]):
+    # Complaint rules (negative signals)
+    if any(w in t for w in ["damag", "broken", "disappoint", "not good", "bad", "spoiled",
+                             "mold", "leak", "worst", "terrible", "awful", "furious",
+                             "unacceptable", "frustrated", "wrong item", "late delivery",
+                             "rude", "expired", "missing"]):
         return "complaint"
-    if re.search(r"\b(price|cost|how much|rate|what is the price|price of)\b", t):
+    # Feedback rules (positive signals)
+    if any(w in t for w in ["love your", "great service", "excellent", "amazing service",
+                             "keep up", "best experience", "5 stars", "wonderful",
+                             "impressed", "thank you so much", "highly recommend",
+                             "fantastic", "outstanding"]):
+        return "feedback"
+    # Inquiry rules
+    if re.search(r"\b(price|cost|how much|rate|what is the price|price of|when will|"
+                 r"do you offer|what payment|is this in stock|return policy|how do i|"
+                 r"can i get|delivery time|business hours|track my|shipping)\b", t):
         return "inquiry"
-    if re.search(r"\b(order|buy|want|need|i want|i'd like|i would like)\b", t):
+    # Order rules
+    if re.search(r"\b(order|buy|want|need|i want|i'd like|i would like|purchase|"
+                 r"book me|add to cart|checkout|deliver|send me|place.+order)\b", t):
         return "order"
     return None
 
@@ -69,7 +84,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--message", "-m", type=str, help="Message to categorize")
     parser.add_argument("--model", type=str, default="", help="Optional explicit model path")
-    parser.add_argument("--threshold", type=float, default=0.55, help="Probability threshold below which -> invalid")
+    parser.add_argument("--threshold", type=float, default=0.45, help="Probability threshold below which -> invalid")
     args = parser.parse_args()
 
     msg = args.message
@@ -83,26 +98,26 @@ def main():
         safe_print_json({"error": "No message provided"})
         return 1
 
-    # quick rule override (high precision)
+    # Quick rule override (high precision)
     rb = rule_based_label(msg)
     if rb:
         safe_print_json({"category": rb, "confidence": 1.0, "source": "rule"})
         return 0
 
-    # candidate model paths (look in likely locations)
+    # Candidate model paths
     candidate_paths = []
     if args.model:
         candidate_paths.append(args.model)
 
     script_dir = Path(__file__).resolve().parent
     candidate_paths.extend([
-        script_dir / "models" / "categorizer.pkl",                 # CatMod/models/categorizer.pkl
-        script_dir.parent / "backend" / "models" / "categorizer.pkl", # ../backend/models/categorizer.pkl
-        script_dir.parent / "models" / "categorizer.pkl",         # ../models/categorizer.pkl
-        Path.cwd() / "models" / "categorizer.pkl",               # cwd/models/categorizer.pkl
+        script_dir / "models" / "categorizer.pkl",
+        script_dir.parent / "backend" / "models" / "categorizer.pkl",
+        script_dir.parent / "models" / "categorizer.pkl",
+        Path.cwd() / "models" / "categorizer.pkl",
     ])
 
-    # normalize and unique
+    # Normalize and unique
     candidate_paths = [str(Path(p).resolve()) for p in candidate_paths]
     seen = set()
     candidate_paths = [p for p in candidate_paths if not (p in seen or seen.add(p))]
@@ -112,7 +127,6 @@ def main():
         safe_print_json({"error": f"Model load failed: {err}", "tried": candidate_paths})
         return 2
 
-    # preprocess same as train
     txt = clean_text(msg)
 
     try:

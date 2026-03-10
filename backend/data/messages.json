@@ -1,0 +1,152 @@
+[
+  {
+    "id": "mmke9voqyiyq",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "I need my cake to be good",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T09:15:20.618Z"
+  },
+  {
+    "id": "mmke7snyxt02",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "pot hole",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-10T09:13:43.390Z"
+  },
+  {
+    "id": "mmke6wpg55wh",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "your cake",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-10T09:13:01.972Z"
+  },
+  {
+    "id": "mmke6rweulfa",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "I need cake",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T09:12:55.742Z"
+  },
+  {
+    "id": "mmkdiqz4clrj",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "nice cakes",
+    "category": "invalid",
+    "confidence": 0.2307228803653226,
+    "source": "model",
+    "timestamp": "2026-03-10T08:54:14.800Z"
+  },
+  {
+    "id": "mmkdilpt7oto",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "jksdbnclkwsndcsd",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-10T08:54:07.985Z"
+  },
+  {
+    "id": "mmkdii1zuwfi",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "price of cake",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T08:54:03.239Z"
+  },
+  {
+    "id": "mmkdia0cdztr",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cakes are not good",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T08:53:52.812Z"
+  },
+  {
+    "id": "mmkdi4aevkxd",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "i want 2 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T08:53:45.398Z"
+  },
+  {
+    "id": "mmkdhvh1ybsk",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "nice product",
+    "category": "invalid",
+    "confidence": 0.30972461992335437,
+    "source": "model",
+    "timestamp": "2026-03-10T08:53:33.973Z"
+  },
+  {
+    "id": "mmkabb8nbh1r",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "asdfghjkl random stuff",
+    "category": "invalid",
+    "confidence": 0.48745919732121656,
+    "source": "model",
+    "timestamp": "2026-03-10T07:24:28.967Z"
+  },
+  {
+    "id": "mmkab7tfsjk2",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "Great service, really impressed with the quality!",
+    "category": "feedback",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T07:24:24.531Z"
+  },
+  {
+    "id": "mmkab3ltm03a",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "What are your business hours?",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T07:24:19.074Z"
+  },
+  {
+    "id": "mmkaavkrbnm0",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "My delivery arrived damaged and broken",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T07:24:08.667Z"
+  },
+  {
+    "id": "mmkaan1olbdc",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "I want to order 5 pizzas",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-10T07:23:57.612Z"
+  }
+]
