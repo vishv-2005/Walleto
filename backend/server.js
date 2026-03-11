@@ -9,6 +9,13 @@ const { spawn } = require("child_process");
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Log EVERY request so we can see if Meta is reaching us
+app.use((req, res, next) => {
+  console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // ── JSON File Storage ──────────────────────────────────────────────
@@ -90,16 +97,22 @@ app.get("/webhook", (req, res) => {
 });
 
 // POST /webhook  — Receive WhatsApp messages
-app.post("/webhook", async (req, res) => {
+app.post("/webhook", (req, res) => {
   const data = req.body;
 
+  // IMPORTANT: Respond to Meta immediately (they expect 200 within 5s)
+  res.status(200).send("EVENT_RECEIVED");
+
+  // Process messages in the background
   if (data.object === "whatsapp_business_account") {
     for (const entry of data.entry || []) {
       for (const change of entry.changes || []) {
         if (change.field === "messages") {
           const value = change.value;
+          if (!value.messages) continue; // skip status updates (read receipts etc.)
+
           const contacts = value.contacts || [];
-          const messages = value.messages || [];
+          const messages = value.messages;
 
           for (const message of messages) {
             if (message.type === "text") {
@@ -109,31 +122,41 @@ app.post("/webhook", async (req, res) => {
 
               console.log(`📱 Message from ${contactName} (${from}): ${text}`);
 
-              try {
-                const result = await categorizeMessage(text);
-                const record = {
-                  id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                  from,
-                  name: contactName,
-                  message: text,
-                  category: result.category || "invalid",
-                  confidence: result.confidence || 0,
-                  source: result.source || "unknown",
-                  timestamp: new Date().toISOString(),
-                };
-                addMessage(record);
-                console.log(`🎯 Categorized: [${record.category}] ${text}`);
-              } catch (err) {
-                console.error("❌ Categorization failed:", err.message);
-              }
+              // Store message first, then categorize
+              const record = {
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                from,
+                name: contactName,
+                message: text,
+                category: "pending",
+                confidence: 0,
+                source: "pending",
+                timestamp: new Date().toISOString(),
+              };
+
+              // Categorize and update the record
+              categorizeMessage(text)
+                .then((result) => {
+                  record.category = result.category || "invalid";
+                  record.confidence = result.confidence || 0;
+                  record.source = result.source || "unknown";
+                  addMessage(record);
+                  console.log(`🎯 Categorized: [${record.category}] ${text}`);
+                })
+                .catch((err) => {
+                  console.error("❌ Categorization failed:", err.message);
+                  // Still store the message even if categorization fails
+                  record.category = "invalid";
+                  record.source = "error";
+                  addMessage(record);
+                  console.log(`⚠️ Stored uncategorized: ${text}`);
+                });
             }
           }
         }
       }
     }
   }
-
-  res.status(200).send("EVENT_RECEIVED");
 });
 
 // ── API Endpoints (for Dashboard) ─────────────────────────────────
@@ -194,6 +217,72 @@ app.post("/categorize", async (req, res) => {
 app.delete("/api/messages", (req, res) => {
   saveMessages([]);
   res.json({ status: "cleared" });
+});
+
+// ── Debug / Diagnostic Page ────────────────────────────────────────
+app.get("/debug", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html><head><title>Walleto Debug</title>
+    <style>body{font-family:sans-serif;background:#111;color:#eee;padding:20px}
+    .ok{color:#22c55e} .err{color:#ef4444} .warn{color:#f59e0b}
+    pre{background:#222;padding:12px;border-radius:8px;overflow-x:auto}
+    button{padding:8px 16px;background:#6c63ff;color:#fff;border:none;border-radius:6px;cursor:pointer;margin:4px}
+    </style></head><body>
+    <h1>🔧 Walleto Debug</h1>
+    <h2>1. Server Config</h2>
+    <pre>
+VERIFY_TOKEN: ${process.env.META_VERIFY_TOKEN ? "✅ Set" : "❌ NOT SET"}
+ACCESS_TOKEN: ${process.env.META_ACCESS_TOKEN ? "✅ Set (" + process.env.META_ACCESS_TOKEN.slice(0, 10) + "...)" : "❌ NOT SET"}
+PHONE_NUMBER_ID: ${process.env.META_PHONE_NUMBER_ID || "❌ NOT SET"}
+APP_SECRET: ${process.env.META_APP_SECRET ? "✅ Set" : "❌ NOT SET"}
+PORT: ${process.env.PORT || 5000}
+    </pre>
+
+    <h2>2. Quick Tests</h2>
+    <p>Click to simulate a webhook message (tests the full pipeline without WhatsApp):</p>
+    <button onclick="simulateWebhook('I want to order biryani')">Test Order</button>
+    <button onclick="simulateWebhook('My order arrived damaged')">Test Complaint</button>
+    <button onclick="simulateWebhook('What is the price?')">Test Inquiry</button>
+    <button onclick="simulateWebhook('Great service, love it!')">Test Feedback</button>
+    <div id="result" style="margin-top:12px"></div>
+
+    <h2>3. Webhook Checklist</h2>
+    <ol>
+      <li>Is <b>ngrok</b> running? → Run <code>ngrok http 5000</code> in another terminal</li>
+      <li>Copy the <b>https://...ngrok-free.dev</b> URL from ngrok</li>
+      <li>In Meta Dashboard → WhatsApp → <b>Configuration</b> → Edit Webhook:
+        <ul>
+          <li><b>Callback URL</b>: <code>https://YOUR-NGROK-URL/webhook</code></li>
+          <li><b>Verify Token</b>: <code>${process.env.META_VERIFY_TOKEN}</code></li>
+        </ul>
+      </li>
+      <li>Click <b>Verify and Save</b> → should succeed if ngrok + server running</li>
+      <li><b>Subscribe to "messages"</b> → click Manage → check the "messages" checkbox</li>
+    </ol>
+
+    <script>
+    async function simulateWebhook(text) {
+      const payload = {
+        object: "whatsapp_business_account",
+        entry: [{
+          id: "TEST", changes: [{
+            field: "messages",
+            value: {
+              messaging_product: "whatsapp",
+              contacts: [{ profile: { name: "Test User" }, wa_id: "919999999999" }],
+              messages: [{ from: "919999999999", id: "test123", timestamp: "${Math.floor(Date.now() / 1000)}",
+                text: { body: text }, type: "text" }]
+            }
+          }]
+        }]
+      };
+      const r = await fetch("/webhook", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+      document.getElementById("result").innerHTML = '<pre class="ok">✅ Sent! Check dashboard at <a href="/" style="color:#6c63ff">http://localhost:5000</a></pre>';
+    }
+    </script>
+    </body></html>
+  `);
 });
 
 // ── Serve Dashboard ────────────────────────────────────────────────
