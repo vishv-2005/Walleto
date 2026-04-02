@@ -1,5 +1,155 @@
 [
   {
+    "id": "mngymht0c3k0",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want two cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-04-02T04:13:39.108Z"
+  },
+  {
+    "id": "mmn1zhergojx",
+    "from": "919512537083",
+    "name": "Hem Gabhawala",
+    "message": "how much of cake ?",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-12T05:54:38.691Z"
+  },
+  {
+    "id": "mmn1y9k64902",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "The cakes are not good",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-12T05:53:41.862Z"
+  },
+  {
+    "id": "mmn1xxqfaco7",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want 2 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-12T05:53:26.535Z"
+  },
+  {
+    "id": "mmloi30gy44a",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I am dispointed",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-11T06:49:25.696Z"
+  },
+  {
+    "id": "mmlohfbkxog3",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want 5 cake",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-11T06:48:54.992Z"
+  },
+  {
+    "id": "mmloeptq89cy",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "What is price for this?",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-11T06:46:48.638Z"
+  },
+  {
+    "id": "mmlni5vn9j30",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want to order something",
+    "category": "order",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-11T06:21:29.795Z"
+  },
+  {
+    "id": "mmlnheyu2t2t",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "hdjeurvfigr",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-11T06:20:54.918Z"
+  },
+  {
+    "id": "mmlngoi3uta7",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Bad",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-11T06:20:20.619Z"
+  },
+  {
+    "id": "mmlngf64g2w1",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Very response",
+    "category": "invalid",
+    "confidence": 0.229751369430156,
+    "source": "model",
+    "timestamp": "2026-03-11T06:20:08.524Z"
+  },
+  {
+    "id": "mmlng4tlpcke",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Very bad response",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "rule",
+    "timestamp": "2026-03-11T06:19:55.113Z"
+  },
+  {
+    "id": "mmlnfh8buiaf",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "What are the products available",
+    "category": "invalid",
+    "confidence": 0.2834068619738036,
+    "source": "model",
+    "timestamp": "2026-03-11T06:19:24.539Z"
+  },
+  {
+    "id": "mmlneuiztup7",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "What are the items that available",
+    "category": "invalid",
+    "confidence": 0.2495337316385378,
+    "source": "model",
+    "timestamp": "2026-03-11T06:18:55.115Z"
+  },
+  {
+    "id": "mmlne5z60fhy",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Hey there",
+    "category": "invalid",
+    "confidence": 0.42709500036986053,
+    "source": "model",
+    "timestamp": "2026-03-11T06:18:23.298Z"
+  },
+  {
     "id": "mmlmsagnipp9",
     "from": "918488045303",
     "name": "Vishv Patel",
