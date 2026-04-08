@@ -1,113 +1,50 @@
-# Walleto — WhatsApp Message Categorizer
+# Welcome to your Expo app 👋
 
-Automatically categorize WhatsApp messages into **Order**, **Inquiry**, **Complaint**, **Feedback**, or **Invalid** — with a live dashboard for business owners.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-```
-Customer WhatsApp → Meta API → Webhook → Node.js → Python ML → Dashboard
-```
+## Get started
 
-## Quick Start
+1. Install dependencies
 
-### 1. Install Dependencies
+   ```bash
+   npm install
+   ```
 
-```bash
-# Backend (Node.js)
-cd backend && npm install
+2. Start the app
 
-# ML Model (Python)
-cd CatMod && pip install -r requirements.txt
-```
+   ```bash
+   npx expo start
+   ```
 
-### 2. Train the Model
+In the output, you'll find options to open the app in a
 
-```bash
-cd CatMod
-python main.py
-```
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-### 3. Configure `.env`
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-Edit `backend/.env` with your Meta credentials:
+## Get a fresh project
 
-```env
-META_APP_SECRET=your_app_secret
-META_VERIFY_TOKEN=walleto_verify_token
-META_ACCESS_TOKEN=your_temporary_token   # ← refresh this when expired
-META_PHONE_NUMBER_ID=your_phone_number_id
-PORT=5000
-```
-
-> **Token Refresh**: The temporary access token from Meta expires every ~24 hours.  
-> Just paste a new one in `.env` and restart the server.
-
-### 4. Start the Server
+When you're ready, run:
 
 ```bash
-cd backend
-node server.js
+npm run reset-project
 ```
 
-Open **http://localhost:5000** to see the dashboard.
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-### 5. Connect WhatsApp (with ngrok)
+## Learn more
 
-```bash
-ngrok http 5000
-```
+To learn more about developing your project with Expo, look at the following resources:
 
-Then in [Meta Developers Dashboard](https://developers.facebook.com/):
-1. Go to your App → WhatsApp → Configuration
-2. Set **Callback URL**: `https://your-ngrok-url.ngrok-free.dev/webhook`
-3. Set **Verify Token**: `walleto_verify_token` (must match `.env`)
-4. Subscribe to the **messages** field
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Project Structure
+## Join the community
 
-```
-Walleto/
-├── CatMod/                     # ML Categorization Model
-│   ├── training_data.py        # Training examples (5 categories)
-│   ├── main.py                 # Train & save model
-│   ├── predict.py              # Predict category from message
-│   ├── models/                 # Saved model files
-│   └── requirements.txt
-├── backend/                    # Node.js Server
-│   ├── server.js               # Main server (webhook + API + dashboard)
-│   ├── categorize.py           # Python bridge for Node.js
-│   ├── public/                 # Dashboard UI
-│   │   ├── index.html
-│   │   ├── style.css
-│   │   └── app.js
-│   ├── data/                   # Stored messages (JSON)
-│   ├── .env                    # Your credentials (don't commit!)
-│   └── package.json
-└── README.md
-```
+Join our community of developers creating universal apps.
 
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Dashboard UI |
-| GET | `/webhook` | Meta webhook verification |
-| POST | `/webhook` | Receive WhatsApp messages |
-| POST | `/categorize` | Manual categorization (`{ "message": "..." }`) |
-| GET | `/api/messages` | All stored messages |
-| GET | `/api/stats` | Category counts |
-| DELETE | `/api/messages` | Clear all messages |
-
-## Categories
-
-| Category | Description | Dashboard Color |
-|----------|-------------|-----------------|
-| 🛒 Order | Purchase/delivery requests | Green |
-| ❓ Inquiry | Questions about price, stock, etc. | Blue |
-| ⚠️ Complaint | Negative feedback, issues | Red |
-| 💬 Feedback | Positive feedback, appreciation | Yellow |
-| 🚫 Invalid | Gibberish, spam, unrelated | Gray |
-
-## Troubleshooting
-
-- **Model not found**: Run `cd CatMod && python main.py` to train first
-- **Webhook fails**: Ensure `META_VERIFY_TOKEN` in `.env` matches what you set in Meta
-- **Token expired**: Get new token from Meta dashboard → update `.env` → restart server
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
