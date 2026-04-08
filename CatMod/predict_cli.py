@@ -92,13 +92,14 @@ def hybrid_classify(msg, model):
     # --- 2. RULE LAYER (Priority: Precedence goes to checks lower in the function) ---
     
     # 2a) Inquiry Detection (Lowest Priority)
-    inquiry_kws = ["?", "what", "price", "how", "details", "kitna", "kya", "cost", "paisa", "catalog"]
+    inquiry_kws = ["?", "what", "price", "how", "details", "kitna", "kya", "cost", "paisa", "catalog", "discount", "offer", "rate"]
     if any(kw in clean_msg for kw in inquiry_kws):
         final_prediction = "Inquiry"
         source = "Rule-Based"
 
     # 2b) Irrelevant & Short Message Detection
-    is_greeting = any(kw in clean_msg for kw in GREETING_WORDS)
+    padded_msg = f" {clean_msg} "
+    is_greeting = any(f" {kw} " in padded_msg for kw in GREETING_WORDS)
     is_short = len(words) <= 3 and not any(kw in clean_msg for kw in inquiry_kws)
     if is_greeting or is_short:
         final_prediction = "Irrelevant"

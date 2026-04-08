@@ -168,6 +168,13 @@ def main():
         print(f"- Best Performing Class (Real-world): {best} ({f1_scores[best]:.2f})")
         print(f"- Weakest Performing Class (Real-world): {weakest} ({f1_scores[weakest]:.2f})")
     
+    # Save the trained model
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(script_dir, 'models', 'categorizer_final.pkl')
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    joblib.dump(pipeline, model_path)
+    print(f"\n[INFO] Model saved successfully to {model_path}")
+
     print("\nSUCCESS: Retraining complete with full accuracy breakdown!")
 
 if __name__ == "__main__":
