@@ -1,5 +1,225 @@
 [
   {
+    "id": "mnqfvmaa48mr",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Bc mera cake kaha hai",
+    "category": "Complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:26:33.874Z"
+  },
+  {
+    "id": "mnqfv9nib7ug",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I love this cakes",
+    "category": "Irrelevant",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:26:17.502Z"
+  },
+  {
+    "id": "mnqfuzsfz8er",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I love this cakes ❤️",
+    "category": "invalid",
+    "confidence": 0,
+    "source": "unknown",
+    "timestamp": "2026-04-08T19:26:04.719Z"
+  },
+  {
+    "id": "mnqfumjmcc29",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I love you ❤️",
+    "category": "invalid",
+    "confidence": 0,
+    "source": "unknown",
+    "timestamp": "2026-04-08T19:25:47.554Z"
+  },
+  {
+    "id": "mnqfu9jrcd2d",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Manali chaloge?",
+    "category": "Irrelevant",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:25:30.711Z"
+  },
+  {
+    "id": "mnqftw0vgmtn",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Ghumne jana hai",
+    "category": "Irrelevant",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:25:13.183Z"
+  },
+  {
+    "id": "mnqft7wiuzao",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Ye cake to bekar hai",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:24:41.922Z"
+  },
+  {
+    "id": "mnqfsyzau8jy",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Muje 2 cake chahiye",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:24:30.358Z"
+  },
+  {
+    "id": "mnqfsnqn0m4u",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want two cakes",
+    "category": "Complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:24:15.791Z"
+  },
+  {
+    "id": "mnqfngningx0",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bhej diya ?",
+    "category": "Irrelevant",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:20:13.326Z"
+  },
+  {
+    "id": "mnqfn9ytogan",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bhej diya kya",
+    "category": "Inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:20:04.661Z"
+  },
+  {
+    "id": "mnqfn1nx2lla",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake kab tak milega",
+    "category": "Inquiry",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:19:53.901Z"
+  },
+  {
+    "id": "mnqfm7yuddb2",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake ka rate kya hai",
+    "category": "Inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:19:15.414Z"
+  },
+  {
+    "id": "mnqfll4a32r8",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake bekaar hai",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:18:45.802Z"
+  },
+  {
+    "id": "mnqflb56kafs",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "muje 2 cakes chahiy",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:18:32.874Z"
+  },
+  {
+    "id": "mnqf2vmp3fc2",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "bro iska rate batao bro",
+    "category": "Irrelevant",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:04:12.961Z"
+  },
+  {
+    "id": "mnqf0d1edeva",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "bro iska rate batao",
+    "category": "Irrelevant",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:02:15.554Z"
+  },
+  {
+    "id": "mnqezoy1xt7b",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bigde huwe hai",
+    "category": "Irrelevant",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:01:44.329Z"
+  },
+  {
+    "id": "mnqezgmz9q60",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake acche nahi hai",
+    "category": "Irrelevant",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:01:33.563Z"
+  },
+  {
+    "id": "mnqez91yp4u1",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "muje 2 cake chahiye",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:01:23.734Z"
+  },
+  {
+    "id": "mnqeyx2slea7",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "i want 2 cakes",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:01:08.212Z"
+  },
+  {
+    "id": "mnqed4p3dd0g",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "i want two cakes",
+    "category": "invalid",
+    "confidence": 0,
+    "source": "unknown",
+    "timestamp": "2026-04-08T18:44:11.655Z"
+  },
+  {
     "id": "mngymht0c3k0",
     "from": "918488045303",
     "name": "Vishv Patel",
