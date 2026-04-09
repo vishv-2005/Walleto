@@ -49,6 +49,35 @@ function addMessage(msg) {
   saveMessages(messages);
 }
 
+// ── User File Storage ──────────────────────────────────────────────
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+
+function loadUsers() {
+  ensureDataDir();
+  if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]", "utf-8");
+  try {
+    return JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  ensureDataDir();
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+}
+
+// ── Category Normalization ─────────────────────────────────────────
+function normalizeCategory(cat) {
+  if (!cat) return "others";
+  const lower = cat.toLowerCase();
+  if (lower === "order" || lower === "ordering") return "orders";
+  if (lower === "complaint") return "complaints";
+  if (lower === "inquiry") return "inquiries";
+  if (lower === "logistic" || lower === "logistics") return "logistics";
+  return "others";
+}
+
 // ── Categorization via Python ──────────────────────────────────────
 function categorizeMessage(message) {
   return new Promise((resolve, reject) => {
@@ -131,6 +160,7 @@ app.post("/webhook", (req, res) => {
                 category: "pending",
                 confidence: 0,
                 source: "pending",
+                status: "Pending",
                 timestamp: new Date().toISOString(),
               };
 
@@ -167,19 +197,27 @@ app.get("/api/messages", (req, res) => {
   res.json(messages);
 });
 
-// GET /api/stats — return summary counts
+// GET /api/stats — return summary counts grouped for frontend
 app.get("/api/stats", (req, res) => {
   const messages = loadMessages();
   const stats = {
     total: messages.length,
-    order: 0,
-    inquiry: 0,
-    complaint: 0,
-    feedback: 0,
-    invalid: 0,
+    orders: 0,
+    complaints: 0,
+    inquiries: 0,
+    logistics: 0,
+    others: 0,
+    completed: 0,
+    pending: 0,
+    inProgress: 0,
   };
   for (const m of messages) {
-    if (stats[m.category] !== undefined) stats[m.category]++;
+    const group = normalizeCategory(m.category);
+    stats[group]++;
+    const status = (m.status || "Pending");
+    if (status === "Completed") stats.completed++;
+    else if (status === "In Progress") stats.inProgress++;
+    else stats.pending++;
   }
   res.json(stats);
 });
@@ -203,6 +241,7 @@ app.post("/categorize", async (req, res) => {
       category: result.category || "invalid",
       confidence: result.confidence || 0,
       source: result.source || "unknown",
+      status: "Pending",
       timestamp: new Date().toISOString(),
     };
     addMessage(record);
@@ -217,6 +256,145 @@ app.post("/categorize", async (req, res) => {
 app.delete("/api/messages", (req, res) => {
   saveMessages([]);
   res.json({ status: "cleared" });
+});
+
+// ── Auth Endpoints ─────────────────────────────────────────────────
+
+app.post("/api/auth/signup", async (req, res) => {
+  const { email, password, name } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+  const users = loadUsers();
+  if (users.find(u => u.email === email.toLowerCase())) {
+    return res.status(409).json({ error: "Account already exists" });
+  }
+  users.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    email: email.toLowerCase(),
+    password,
+    name: name || "",
+    createdAt: new Date().toISOString(),
+  });
+  saveUsers(users);
+  res.json({ success: true, message: "Account created" });
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toLowerCase() && u.password === password);
+  if (!user) return res.status(401).json({ error: "Invalid email or password" });
+  res.json({ success: true, user: { id: user.id, email: user.email, name: user.name } });
+});
+
+// ── Categories CRUD ───────────────────────────────────────────────
+
+app.get("/api/categories", (req, res) => {
+  const messages = loadMessages();
+  const grouped = { orders: [], complaints: [], inquiries: [], logistics: [], others: [] };
+  for (const msg of messages) {
+    const group = normalizeCategory(msg.category);
+    grouped[group].push({
+      id: msg.id,
+      name: msg.message,
+      status: msg.status || "Pending",
+      from: msg.from,
+      contactName: msg.name,
+      confidence: msg.confidence,
+      source: msg.source,
+      originalCategory: msg.category,
+      timestamp: msg.timestamp,
+    });
+  }
+  res.json(grouped);
+});
+
+app.post("/api/categories/:category", async (req, res) => {
+  const { category } = req.params;
+  const { name, status } = req.body;
+  if (!name) return res.status(400).json({ error: "Name is required" });
+  const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", logistics: "logistic", others: "invalid" };
+  const record = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    from: "manual_app",
+    name: "App User",
+    message: name,
+    category: catMap[category] || "invalid",
+    confidence: 1,
+    source: "manual",
+    status: status || "Pending",
+    timestamp: new Date().toISOString(),
+  };
+  addMessage(record);
+  res.json({ success: true, item: { id: record.id, name: record.message, status: record.status } });
+});
+
+app.put("/api/categories/:category/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, status } = req.body;
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (!msg) return res.status(404).json({ error: "Item not found" });
+  if (name !== undefined) msg.message = name;
+  if (status !== undefined) msg.status = status;
+  saveMessages(messages);
+  res.json({ success: true });
+});
+
+app.delete("/api/categories/:category/:id", async (req, res) => {
+  const { id } = req.params;
+  const messages = loadMessages();
+  saveMessages(messages.filter(m => m.id !== id));
+  res.json({ success: true });
+});
+
+// ── Notifications ─────────────────────────────────────────────────
+
+app.get("/api/notifications", (req, res) => {
+  const messages = loadMessages();
+  const notifications = messages.slice(0, 30).map(msg => ({
+    id: msg.id,
+    text: `New ${normalizeCategory(msg.category).replace(/s$/, "")}: "${msg.message}"`,
+    from: msg.name || msg.from,
+    category: msg.category,
+    date: msg.timestamp,
+    done: msg.notificationRead || false,
+  }));
+  res.json(notifications);
+});
+
+app.put("/api/notifications/:id/read", async (req, res) => {
+  const { id } = req.params;
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (msg) {
+    msg.notificationRead = !(msg.notificationRead || false);
+    saveMessages(messages);
+  }
+  res.json({ success: true });
+});
+
+// ── Profile ───────────────────────────────────────────────────────
+
+app.get("/api/profile", (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: "Email query param required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toString().toLowerCase());
+  if (!user) return res.status(404).json({ error: "User not found" });
+  res.json({ name: user.name || "", email: user.email });
+});
+
+app.put("/api/profile", async (req, res) => {
+  const { email, name, newEmail } = req.body;
+  if (!email) return res.status(400).json({ error: "Email required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toLowerCase());
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (name !== undefined) user.name = name;
+  if (newEmail) user.email = newEmail.toLowerCase();
+  saveUsers(users);
+  res.json({ success: true });
 });
 
 // ── Debug / Diagnostic Page ────────────────────────────────────────
