@@ -24,8 +24,8 @@ type CategoriesData = {
   orders: CategoryItem[];
   complaints: CategoryItem[];
   inquiries: CategoryItem[];
-  logistics: CategoryItem[];
-  others: CategoryItem[];
+  feedback: CategoryItem[];
+  invalid: CategoryItem[];
 };
 
 export default function Categories() {
@@ -46,8 +46,8 @@ export default function Categories() {
     orders: [],
     complaints: [],
     inquiries: [],
-    logistics: [],
-    others: [],
+    feedback: [],
+    invalid: [],
   });
 
   const [newItem, setNewItem] = useState('');
@@ -67,8 +67,8 @@ export default function Categories() {
         orders: result.orders || [],
         complaints: result.complaints || [],
         inquiries: result.inquiries || [],
-        logistics: result.logistics || [],
-        others: result.others || [],
+        feedback: result.feedback || [],
+        invalid: result.invalid || [],
       });
     } catch (e) {
       console.log('Error loading categories:', e);
@@ -88,7 +88,7 @@ export default function Categories() {
           await updateCategoryItem(activeTab, item.id, { name: newItem });
         }
       } else {
-        const status = (activeTab === 'orders' || activeTab === 'logistics') ? 'Pending' : undefined;
+        const status = (activeTab === 'orders') ? 'Pending' : undefined;
         await addCategoryItem(activeTab, newItem, status);
       }
       await loadData();
@@ -127,8 +127,8 @@ export default function Categories() {
   );
 
   const cycleOrderStatus = async (index: number) => {
-    if (activeTab !== 'orders' && activeTab !== 'logistics') return;
-    const list = activeTab === 'orders' ? data.orders : data.logistics;
+    if (activeTab !== 'orders') return;
+    const list = data.orders;
     const current = list[index];
     if (!current?.id) return;
 
@@ -163,7 +163,7 @@ export default function Categories() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabs}
       >
-        {['orders', 'complaints', 'inquiries', 'logistics', 'others'].map(tab => (
+        {['orders', 'complaints', 'inquiries', 'feedback', 'invalid'].map(tab => (
           <TouchableOpacity
             key={tab}
             style={[
@@ -212,7 +212,7 @@ export default function Categories() {
         <View key={item.id || index} style={[styles.row, { backgroundColor: card }]}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.cell, { color: text }]}>{item.name}</Text>
-            {activeTab === 'orders' || activeTab === 'logistics' ? (
+            {activeTab === 'orders' ? (
               <TouchableOpacity onPress={() => cycleOrderStatus(index)} style={{ marginTop: 4 }}>
                 <Text style={{ color: darkMode ? '#22c55e' : '#16a34a', fontSize: 12 }}>
                   Status: {item.status ?? 'Pending'} (tap to change)

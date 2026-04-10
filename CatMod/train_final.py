@@ -5,6 +5,11 @@ import string
 import os
 import sys
 import joblib
+from pathlib import Path
+
+# Ensure training_data.py is in target path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from training_data import get_training_data
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -82,6 +87,39 @@ def main():
     train_df = pd.read_csv(train_path)
     train_df.columns = ['message', 'label'] # Canonicalize columns
     
+    # --- Label Mapping: Consolidate to 5 Target Categories ---
+    label_map = {
+        'Ordering': 'order',
+        'Logistics': 'order',
+        'Inquiry': 'inquiry',
+        'Complaint': 'complaint',
+        'Irrelevant': 'invalid',
+        'order': 'order',
+        'inquiry': 'inquiry',
+        'complaint': 'complaint',
+        'feedback': 'feedback',
+        'invalid': 'invalid'
+    }
+    train_df['label'] = train_df['label'].map(label_map).fillna('invalid')
+
+    # --- Append high-quality examples from training_data.py ---
+    programmatic_df = get_training_data()
+    programmatic_df = programmatic_df.rename(columns={'category': 'label'})
+    
+    # Load Massive 15K Dataset
+    synthetic_path = os.path.join(os.path.dirname(__file__), "synthetic_data_15k.csv")
+    if os.path.exists(synthetic_path):
+        synth_df = pd.read_csv(synthetic_path)
+        train_df = pd.concat([train_df, programmatic_df, synth_df], ignore_index=True)
+    else:
+        train_df = pd.concat([train_df, programmatic_df], ignore_index=True)
+    
+    # Drop any NaN values that might have been introduced
+    train_df = train_df.dropna(subset=['message', 'label'])
+    
+    print(f"Dataset Size after consolidation: {len(train_df)}")
+    print("Category Distribution:\n", train_df['label'].value_counts())
+
     # Preprocessing
     train_df['clean_msg'] = train_df['message'].apply(clean_whatsapp_text)
     
@@ -96,6 +134,8 @@ def main():
     if os.path.exists(test_path):
         external_test = pd.read_csv(test_path)
         external_test.columns = ['message', 'label']
+        # Apply same mapping to testset
+        external_test['label'] = external_test['label'].map(label_map).fillna('invalid')
         external_test['clean_msg'] = external_test['message'].apply(clean_whatsapp_text)
         X_ext = external_test['clean_msg']
         y_ext = external_test['label']
@@ -120,6 +160,13 @@ def main():
     print("Training the final model...")
     pipeline.fit(X_train, y_train)
     
+    # Save the trained model immediately after training
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(script_dir, 'models', 'categorizer_final.pkl')
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    joblib.dump(pipeline, model_path)
+    print(f"\n[INFO] Model saved successfully to {model_path}")
+
     # Calculate Accuracy
     y_train_pred = pipeline.predict(X_train)
     train_acc = accuracy_score(y_train, y_train_pred)
@@ -161,19 +208,19 @@ def main():
     
     if y_ext_pred is not None:
         report_dict = classification_report(y_ext, y_ext_pred, output_dict=True)
-        f1_scores = {label: report_dict[label]['f1-score'] for label in classes}
-        weakest = min(f1_scores, key=f1_scores.get)
-        best = max(f1_scores, key=f1_scores.get)
+        # Use .get() defensively as some classes may not be present in the external testset
+        f1_scores = {label: report_dict.get(label, {}).get('f1-score', 0) for label in classes}
         
-        print(f"- Best Performing Class (Real-world): {best} ({f1_scores[best]:.2f})")
-        print(f"- Weakest Performing Class (Real-world): {weakest} ({f1_scores[weakest]:.2f})")
+        # Filter out labels with 0 f1-score for weakest/best calculation
+        valid_f1s = {k: v for k, v in f1_scores.items() if v > 0}
+        
+        if valid_f1s:
+            weakest = min(valid_f1s, key=valid_f1s.get)
+            best = max(valid_f1s, key=valid_f1s.get)
+            print(f"- Best Performing Class (Real-world): {best} ({valid_f1s[best]:.2f})")
+            print(f"- Weakest Performing Class (Real-world): {weakest} ({valid_f1s[weakest]:.2f})")
     
-    # Save the trained model
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(script_dir, 'models', 'categorizer_final.pkl')
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    joblib.dump(pipeline, model_path)
-    print(f"\n[INFO] Model saved successfully to {model_path}")
+    # Model already saved above
 
     print("\nSUCCESS: Retraining complete with full accuracy breakdown!")
 

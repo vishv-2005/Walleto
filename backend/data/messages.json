@@ -1,5 +1,193 @@
 [
   {
+    "id": "mnss55pjvpzh",
+    "from": "918758551131",
+    "name": ".",
+    "message": "1kg vadapav",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Completed",
+    "timestamp": "2026-04-10T10:45:26.695Z"
+  },
+  {
+    "id": "mnsrryx9bicw",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Mujhe 2 piece chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:35:11.373Z"
+  },
+  {
+    "id": "mnsrqfjr8q3n",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I loved the product",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:33:59.607Z"
+  },
+  {
+    "id": "mnsroyej04nb",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "The product is excellent",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:32:50.731Z"
+  },
+  {
+    "id": "mnsroexi5lwa",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "The product is excellent",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:32:25.494Z"
+  },
+  {
+    "id": "mnsroac6svpl",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I loved the product",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:32:19.542Z"
+  },
+  {
+    "id": "mnsro794ge6q",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Mujhe 2 piece chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:32:15.544Z"
+  },
+  {
+    "id": "mnsrb72sot7s",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I ordered a vanilla flavour cake aur uska taste bohot kharab tha",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:22:08.788Z"
+  },
+  {
+    "id": "mnsram8oyyxw",
+    "from": "919512537083",
+    "name": "Hem Gabhawala",
+    "message": "I want inquiry about 50 bone china plates for a house party on date 20 April for one day so can tell. How it will cost ??",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:21:41.784Z"
+  },
+  {
+    "id": "mnsr8pukvgeq",
+    "from": "919512537083",
+    "name": "Hem Gabhawala",
+    "message": "Hey",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:20:13.148Z"
+  },
+  {
+    "id": "mnsqxu6imd9e",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "What is the price for the product",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T10:11:45.546Z"
+  },
+  {
+    "id": "mnsqggau0wo8",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are good",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T09:58:14.406Z"
+  },
+  {
+    "id": "mnsqen40v0as",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are good",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-10T09:56:49.920Z"
+  },
+  {
+    "id": "mnsnonsaalal",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want 4 cakes",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Completed",
+    "timestamp": "2026-04-10T08:40:38.506Z"
+  },
+  {
+    "id": "mnrshboe3zq7",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "2 cake ka order karna hai",
+    "category": "Ordering",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-09T18:07:08.126Z",
+    "notificationRead": true
+  },
+  {
+    "id": "mnrsglqijh3u",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I am amazed by the product's quality",
+    "category": "Complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-09T18:06:34.506Z"
+  },
+  {
+    "id": "mnrsg6q7h7ut",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Bohot kharab product tha",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-09T18:06:15.055Z"
+  },
+  {
     "id": "mnrq4gpnmfhp",
     "from": "918488045303",
     "name": "Vishv Patel",
@@ -7,7 +195,7 @@
     "category": "Ordering",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Completed",
     "timestamp": "2026-04-09T17:01:08.891Z"
   },
   {
@@ -29,7 +217,7 @@
     "category": "Complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "In Progress",
     "timestamp": "2026-04-09T17:00:10.258Z"
   },
   {
@@ -55,17 +243,6 @@
     "timestamp": "2026-04-09T16:49:20.394Z"
   },
   {
-    "id": "mnrpn4wgrl29",
-    "from": "918488045303",
-    "name": "Vishv Patel",
-    "message": "I want 5 cakes",
-    "category": "invalid",
-    "confidence": 0,
-    "source": "unknown",
-    "status": "Pending",
-    "timestamp": "2026-04-09T16:47:40.432Z"
-  },
-  {
     "id": "mnqfv9nib7ug",
     "from": "918488045303",
     "name": "Vishv Patel",
@@ -74,26 +251,6 @@
     "confidence": 0.82,
     "source": "ML-Model",
     "timestamp": "2026-04-08T19:26:17.502Z"
-  },
-  {
-    "id": "mnqfuzsfz8er",
-    "from": "918488045303",
-    "name": "Vishv Patel",
-    "message": "I love this cakes ❤️",
-    "category": "invalid",
-    "confidence": 0,
-    "source": "unknown",
-    "timestamp": "2026-04-08T19:26:04.719Z"
-  },
-  {
-    "id": "mnqfumjmcc29",
-    "from": "918488045303",
-    "name": "Vishv Patel",
-    "message": "I love you ❤️",
-    "category": "invalid",
-    "confidence": 0,
-    "source": "unknown",
-    "timestamp": "2026-04-08T19:25:47.554Z"
   },
   {
     "id": "mnqfu9jrcd2d",
@@ -253,7 +410,8 @@
     "category": "Ordering",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:01:23.734Z"
+    "timestamp": "2026-04-08T19:01:23.734Z",
+    "status": "Completed"
   },
   {
     "id": "mnqeyx2slea7",
@@ -453,7 +611,8 @@
     "category": "invalid",
     "confidence": 0.2307228803653226,
     "source": "model",
-    "timestamp": "2026-03-11T05:59:48.348Z"
+    "timestamp": "2026-03-11T05:59:48.348Z",
+    "status": "In Progress"
   },
   {
     "id": "mmlmppy7psyr",
@@ -463,7 +622,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:59:22.783Z"
+    "timestamp": "2026-03-11T05:59:22.783Z",
+    "status": "In Progress"
   },
   {
     "id": "mmlmpdujtypr",
@@ -473,7 +633,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:59:07.099Z"
+    "timestamp": "2026-03-11T05:59:07.099Z",
+    "status": "In Progress"
   },
   {
     "id": "mmlmod3fi4q2",
@@ -483,7 +644,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:58:19.467Z"
+    "timestamp": "2026-03-11T05:58:19.467Z",
+    "status": "Completed"
   },
   {
     "id": "mmlmochurpmu",
@@ -493,7 +655,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:58:18.690Z"
+    "timestamp": "2026-03-11T05:58:18.690Z",
+    "status": "Completed"
   },
   {
     "id": "mmlmj5ncuo9k",

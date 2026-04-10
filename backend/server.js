@@ -69,13 +69,13 @@ function saveUsers(users) {
 
 // ── Category Normalization ─────────────────────────────────────────
 function normalizeCategory(cat) {
-  if (!cat) return "others";
+  if (!cat) return "invalid";
   const lower = cat.toLowerCase();
-  if (lower === "order" || lower === "ordering") return "orders";
+  if (lower === "order" || lower === "ordering" || lower === "logistic" || lower === "logistics") return "orders";
   if (lower === "complaint") return "complaints";
   if (lower === "inquiry") return "inquiries";
-  if (lower === "logistic" || lower === "logistics") return "logistics";
-  return "others";
+  if (lower === "feedback") return "feedback";
+  return "invalid";
 }
 
 // ── Categorization via Python ──────────────────────────────────────
@@ -167,7 +167,33 @@ app.post("/webhook", (req, res) => {
               // Categorize and update the record
               categorizeMessage(text)
                 .then((result) => {
-                  record.category = result.category || "invalid";
+                  const category = result.category || "invalid";
+                  
+                  // --- Order Update Detection Logic ---
+                  if (category === "order") {
+                    const updateKeywords = ["instead", "change", "update", "pack", "cancel", "replace", "nikal", "minus", "plus", "extra"];
+                    const isUpdate = updateKeywords.some(kw => text.toLowerCase().includes(kw));
+                    
+                    if (isUpdate) {
+                      const messages = loadMessages();
+                      // Find most recent pending/in-progress order from this sender
+                      const prevOrder = messages.find(m => 
+                        m.from === from && 
+                        normalizeCategory(m.category) === "orders" && 
+                        (m.status === "Pending" || m.status === "In Progress")
+                      );
+                      
+                      if (prevOrder) {
+                        console.log(`🔄 Updating message for ${from}: "${prevOrder.message}" -> "${text}"`);
+                        prevOrder.message = `${prevOrder.message} (UD: ${text})`;
+                        prevOrder.timestamp = new Date().toISOString(); // optional: bump timestamp
+                        saveMessages(messages);
+                        return; // Done, don't add as new message
+                      }
+                    }
+                  }
+
+                  record.category = category;
                   record.confidence = result.confidence || 0;
                   record.source = result.source || "unknown";
                   addMessage(record);
@@ -205,15 +231,19 @@ app.get("/api/stats", (req, res) => {
     orders: 0,
     complaints: 0,
     inquiries: 0,
-    logistics: 0,
-    others: 0,
+    feedback: 0,
+    invalid: 0,
     completed: 0,
     pending: 0,
     inProgress: 0,
   };
   for (const m of messages) {
     const group = normalizeCategory(m.category);
-    stats[group]++;
+    if (stats.hasOwnProperty(group)) {
+      stats[group]++;
+    } else {
+      stats.invalid++;
+    }
     const status = (m.status || "Pending");
     if (status === "Completed") stats.completed++;
     else if (status === "In Progress") stats.inProgress++;
@@ -291,7 +321,7 @@ app.post("/api/auth/login", async (req, res) => {
 
 app.get("/api/categories", (req, res) => {
   const messages = loadMessages();
-  const grouped = { orders: [], complaints: [], inquiries: [], logistics: [], others: [] };
+  const grouped = { orders: [], complaints: [], inquiries: [], feedback: [], invalid: [] };
   for (const msg of messages) {
     const group = normalizeCategory(msg.category);
     grouped[group].push({
@@ -313,7 +343,7 @@ app.post("/api/categories/:category", async (req, res) => {
   const { category } = req.params;
   const { name, status } = req.body;
   if (!name) return res.status(400).json({ error: "Name is required" });
-  const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", logistics: "logistic", others: "invalid" };
+  const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", feedback: "feedback", others: "invalid", invalid: "invalid" };
   const record = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     from: "manual_app",
@@ -346,6 +376,22 @@ app.delete("/api/categories/:category/:id", async (req, res) => {
   const messages = loadMessages();
   saveMessages(messages.filter(m => m.id !== id));
   res.json({ success: true });
+});
+
+// ── Messages Status Update ────────────────────────────────────────
+
+app.patch("/api/messages/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: "Status is required" });
+  
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (!msg) return res.status(404).json({ error: "Message not found" });
+  
+  msg.status = status;
+  saveMessages(messages);
+  res.json({ success: true, id, status });
 });
 
 // ── Notifications ─────────────────────────────────────────────────

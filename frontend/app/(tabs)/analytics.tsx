@@ -19,7 +19,7 @@ export default function Analytics() {
   const { darkMode } = useContext(ThemeContext);
 
   const [stats, setStats] = useState({
-    total: 0, orders: 0, complaints: 0, inquiries: 0, logistics: 0, others: 0,
+    total: 0, orders: 0, complaints: 0, inquiries: 0, feedback: 0, invalid: 0,
     completed: 0, pending: 0, inProgress: 0,
   });
 
@@ -127,13 +127,13 @@ export default function Analytics() {
 
       <View style={[styles.cards, { marginTop: 12 }]}>
         <View style={[styles.card, { backgroundColor: card }]}>
-          <Text style={{ color: text }}>Logistics</Text>
-          <Text style={[styles.number, { color: text }]}>{stats.logistics}</Text>
+          <Text style={{ color: text }}>Feedback</Text>
+          <Text style={[styles.number, { color: text }]}>{stats.feedback}</Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: card }]}>
-          <Text style={{ color: text }}>Others</Text>
-          <Text style={[styles.number, { color: text }]}>{stats.others}</Text>
+          <Text style={{ color: text }}>Invalid</Text>
+          <Text style={[styles.number, { color: text }]}>{stats.invalid}</Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: card, opacity: 0 }]} />
@@ -146,14 +146,14 @@ export default function Analytics() {
 
       <BarChart
         data={{
-          labels: ["Orders", "Complaints", "Inquiries", "Logistics", "Others"],
+          labels: ["Orders", "Complaints", "Inquiries", "Feedback", "Invalid"],
           datasets: [{
             data: [
               stats.orders,
               stats.complaints,
               stats.inquiries,
-              stats.logistics,
-              stats.others
+              stats.feedback,
+              stats.invalid
             ]
           }]
         }}
@@ -206,7 +206,7 @@ export default function Analytics() {
           chartConfig={{
             backgroundGradientFrom: card,
             backgroundGradientTo: card,
-            color: () => "#000"
+            color: () => "#ffffffff"
           }}
           style={{ borderRadius: 12 }}
         />

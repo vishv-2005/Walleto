@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   const { darkMode } = useContext(ThemeContext);
 
-  const [stats, setStats] = useState({ total: 0, orders: 0, complaints: 0, inquiries: 0, logistics: 0, others: 0 });
+  const [stats, setStats] = useState({ total: 0, orders: 0, complaints: 0, inquiries: 0, feedback: 0, invalid: 0 });
   const [recentMessages, setRecentMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -102,6 +102,19 @@ export default function HomeScreen() {
           <View style={[styles.card, { backgroundColor: card }]}>
             <Text style={{ color: subText, fontSize: 12 }}>Inquiries</Text>
             <Text style={[styles.number, { color: '#3b82f6' }]}>{stats.inquiries}</Text>
+          </View>
+        </View>
+
+        {/* STAT CARDS ROW 3 */}
+        <View style={[styles.cards, { marginTop: 12 }]}>
+          <View style={[styles.card, { backgroundColor: card }]}>
+            <Text style={{ color: subText, fontSize: 12 }}>Feedback</Text>
+            <Text style={[styles.number, { color: '#f59e0b' }]}>{stats.feedback}</Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: card }]}>
+            <Text style={{ color: subText, fontSize: 12 }}>Invalid</Text>
+            <Text style={[styles.number, { color: text }]}>{stats.invalid}</Text>
           </View>
         </View>
 

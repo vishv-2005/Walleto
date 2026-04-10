@@ -79,7 +79,7 @@ def clean_whatsapp_text(text: str) -> str:
 def hybrid_classify(msg, model):
     """
     Combines machine learning with prioritized post-processing rules.
-    Priority: Complaint > Logistics > Ordering > Irrelevant > Inquiry > ML Prediction
+    Priority: Complaint > Order > Inquiry > ML Prediction
     """
     clean_msg = clean_whatsapp_text(msg)
     words = clean_msg.split()
@@ -90,44 +90,39 @@ def hybrid_classify(msg, model):
     source = "ML-Model"
     
     # --- 2. RULE LAYER (Priority: Precedence goes to checks lower in the function) ---
-    
-    # 2a) Inquiry Detection (Lowest Priority)
-    inquiry_kws = ["?", "what", "price", "how", "details", "kitna", "kya", "cost", "paisa", "catalog", "discount", "offer", "rate"]
-    if any(kw in clean_msg for kw in inquiry_kws):
-        final_prediction = "Inquiry"
-        source = "Rule-Based"
-
-    # 2b) Irrelevant & Short Message Detection
+    # Helper for exact word matching to prevent substring bugs (e.g. 'plate' matching 'late')
     padded_msg = f" {clean_msg} "
-    is_greeting = any(f" {kw} " in padded_msg for kw in GREETING_WORDS)
-    is_short = len(words) <= 3 and not any(kw in clean_msg for kw in inquiry_kws)
-    if is_greeting or is_short:
-        final_prediction = "Irrelevant"
-        source = "Rule-Based"
-
-    # 2c) Ordering Detection (CRITICAL)
-    # Include both original Hinglish verbs and their normalized counterparts (give, send)
-    order_verbs = ["dedo", "bhejo", "bhijwa do", "pack kar do", "order kar do", "send kar do", "confirm", "book", "give", "send"]
-    has_number = any(char.isdigit() for char in clean_msg)
-    has_product = any(prod in clean_msg for prod in PRODUCT_WORDS)
+    def contains_kw(kw_list):
+        return any(f" {kw} " in padded_msg for kw in kw_list)
     
-    # Match: "1 cake" (number + product) or "bhejo/send" (order verb)
-    if any(verb in clean_msg for verb in order_verbs) or (has_number and has_product):
-        final_prediction = "Ordering"
+    # 2a) Inquiry Detection
+    inquiry_kws = ["what", "price", "how", "details", "kitna", "kya", "cost", "paisa", "catalog", "discount", "offer", "rate", "inquiry"]
+    if contains_kw(inquiry_kws):
+        final_prediction = "inquiry"
         source = "Rule-Based"
 
-    # 2d) Logistics Detection
-    logistics_kws = ["tracking", "status", "delivery", "kab tak", "kaha hai", "shipped", "dispatched", "track", "received"]
-    if any(kw in clean_msg for kw in logistics_kws):
-        # Specific override for "not received" (belongs in Complaint)
-        if "not" not in clean_msg:
-            final_prediction = "Logistics"
-            source = "Rule-Based"
+    # 2b) Invalid & Short Message Detection
+    is_greeting = contains_kw(GREETING_WORDS)
+    is_short = len(words) <= 3 and not contains_kw(inquiry_kws)
+    if is_greeting or is_short:
+        final_prediction = "invalid"
+        source = "Rule-Based"
 
-    # 2e) Complaint Detection (Highest Priority)
+    # 2c) Order & Logistics Detection (Combined)
+    order_verbs = ["dedo", "bhejo", "bhijwa do", "pack kar do", "order kar do", "send kar do", "confirm", "book", "give", "send", "change", "update", "cancel"]
+    logistics_kws = ["tracking", "status", "delivery", "kab tak", "kaha hai", "shipped", "dispatched", "track", "received"]
+    
+    has_number = any(char.isdigit() for char in clean_msg)
+    has_product = contains_kw(PRODUCT_WORDS)
+    
+    if contains_kw(order_verbs) or contains_kw(logistics_kws) or (has_number and has_product):
+        final_prediction = "order"
+        source = "Rule-Based"
+
+    # 2d) Complaint Detection (Highest Priority)
     complaint_kws = ["dont like", "not good", "bad", "worst", "issue", "problem", "hate", "delay", "late", "refund", "damage", "faulty", "wrong", "not received", "bakwas", "bekar"]
-    if any(kw in clean_msg for kw in complaint_kws):
-        final_prediction = "Complaint"
+    if contains_kw(complaint_kws):
+        final_prediction = "complaint"
         source = "Rule-Based"
 
     return final_prediction, source, clean_msg
