@@ -1,5 +1,16 @@
 [
   {
+    "id": "mnteyk7j87er",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "muje 1 kg mango dedo",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-10T21:24:10.063Z"
+  },
+  {
     "id": "mnt8jvjegi6h",
     "from": "918488045303",
     "name": "Vishv Patel",
@@ -262,9 +273,9 @@
     "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "In Progress",
+    "status": "Completed",
     "timestamp": "2026-04-09T16:55:04.404Z",
-    "statusUpdatedAt": "2026-04-10T19:52:14.702Z"
+    "statusUpdatedAt": "2026-04-10T21:04:59.714Z"
   },
   {
     "id": "mnrppa16xcz1",
@@ -838,17 +849,6 @@
     "source": "rule",
     "timestamp": "2026-03-10T08:54:03.239Z",
     "status": "Not Answered"
-  },
-  {
-    "id": "mmkdia0cdztr",
-    "from": "manual_test",
-    "name": "Manual Test",
-    "message": "cakes are not good",
-    "category": "complaint",
-    "confidence": 1,
-    "source": "rule",
-    "timestamp": "2026-03-10T08:53:52.812Z",
-    "status": "Open"
   },
   {
     "id": "mmkdi4aevkxd",
