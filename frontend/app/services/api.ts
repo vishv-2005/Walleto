@@ -79,6 +79,13 @@ export async function getMessages() {
   return request('/api/messages');
 }
 
+export async function updateMessageStatus(id: string, status: string) {
+  return request(`/api/messages/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
 // ── Categorize ───────────────────────────────────────────
 export async function categorizeMessage(message: string) {
   return request('/categorize', {

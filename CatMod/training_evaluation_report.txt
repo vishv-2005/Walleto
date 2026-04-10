@@ -1,0 +1,54 @@
+Dataset Size after consolidation: 22709
+Category Distribution:
+ label
+order        6055
+inquiry      4558
+complaint    4540
+invalid      4530
+feedback     3026
+Name: count, dtype: int64
+Internal Split: 18167 Train, 4542 Test
+Training the final model...
+
+[INFO] Model saved successfully to E:\Semester\Walleto\CatMod\models\categorizer_final.pkl
+
+========================================
+WHATSAPP CRM FINAL MODEL EVALUATION
+========================================
+
+Training Accuracy (80% Balanced): 98.66%
+Internal Test Accuracy (20% Balanced): 95.79%
+
+Note on External Real-world Test Accuracy (evaluating against old testset.csv):
+Accuracy: 74.80%
+
+Real-world Classification Report:
+              precision    recall  f1-score   support
+
+   complaint       0.79      0.66      0.72        50
+    feedback       0.00      0.00      0.00         0
+     inquiry       0.79      0.74      0.76        50
+     invalid       0.71      0.98      0.82        50
+       order       0.81      0.68      0.74       100
+
+    accuracy                           0.75       250
+   macro avg       0.62      0.61      0.61       250
+weighted avg       0.78      0.75      0.76       250
+
+
+Real-world Confusion Matrix:
+           complaint  feedback  inquiry  invalid  order
+complaint         33         0        4        6      7
+feedback           0         0        0        0      0
+inquiry            2         0       37        2      9
+invalid            1         0        0       49      0
+order              6         8        6       12     68
+
+========================================
+PERFORMANCE ANALYSIS
+========================================
+- Best Performing Class: invalid (0.82 F1-Score)
+- Weakest Performing Class: complaint (0.72 F1-Score)
+- Internal Validation Error: 4.21%
+
+SUCCESS: Retraining complete on massive 22K merged dataset with full accuracy breakdown!
