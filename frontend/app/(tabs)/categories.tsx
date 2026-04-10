@@ -88,8 +88,7 @@ export default function Categories() {
           await updateCategoryItem(activeTab, item.id, { name: newItem });
         }
       } else {
-        const status = (activeTab === 'orders') ? 'Pending' : undefined;
-        await addCategoryItem(activeTab, newItem, status);
+        await addCategoryItem(activeTab, newItem);
       }
       await loadData();
     } catch (e) {
@@ -126,21 +125,28 @@ export default function Categories() {
     item.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const cycleOrderStatus = async (index: number) => {
-    if (activeTab !== 'orders') return;
-    const list = data.orders;
+  const cycleItemStatus = async (index: number) => {
+    if (activeTab === 'feedback' || activeTab === 'invalid') return;
+    
+    const list = data[activeTab as keyof CategoriesData] || [];
     const current = list[index];
     if (!current?.id) return;
-
-    const nextStatus: CategoryItem['status'] =
-      current.status === 'Pending'
-        ? 'In Progress'
-        : current.status === 'In Progress'
-          ? 'Completed'
-          : 'Pending';
+    
+    const normalizedStatus = (current.status || '').toLowerCase();
+    let nextStatus = current.status;
+    
+    if (activeTab === 'orders') {
+      nextStatus = normalizedStatus === 'pending' ? 'In Progress' 
+                   : normalizedStatus === 'in progress' ? 'Completed' 
+                   : 'Pending';
+    } else if (activeTab === 'complaints') {
+      nextStatus = normalizedStatus === 'open' ? 'Resolved' : 'Open';
+    } else if (activeTab === 'inquiries') {
+      nextStatus = normalizedStatus === 'not answered' ? 'Answered' : 'Not Answered';
+    }
 
     try {
-      await updateCategoryItem(activeTab, current.id, { status: nextStatus });
+      await updateCategoryItem(activeTab, current.id, { status: nextStatus as CategoryItem['status'] });
       await loadData();
     } catch (e) {
       console.log('Error updating status:', e);
@@ -212,8 +218,8 @@ export default function Categories() {
         <View key={item.id || index} style={[styles.row, { backgroundColor: card }]}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.cell, { color: text }]}>{item.name}</Text>
-            {activeTab === 'orders' ? (
-              <TouchableOpacity onPress={() => cycleOrderStatus(index)} style={{ marginTop: 4 }}>
+            {['orders', 'complaints', 'inquiries'].includes(activeTab) ? (
+              <TouchableOpacity onPress={() => cycleItemStatus(index)} style={{ marginTop: 4 }}>
                 <Text style={{ color: darkMode ? '#22c55e' : '#16a34a', fontSize: 12 }}>
                   Status: {item.status ?? 'Pending'} (tap to change)
                 </Text>

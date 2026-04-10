@@ -1,5 +1,38 @@
 [
   {
+    "id": "mnt8jvjegi6h",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "i need 3 laptops",
+    "category": "order",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "In Progress",
+    "timestamp": "2026-04-10T18:24:47.210Z"
+  },
+  {
+    "id": "mnt7wckguup7",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are bad",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Resolved",
+    "timestamp": "2026-04-10T18:06:29.536Z"
+  },
+  {
+    "id": "mnt6ff0q1xrm",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "What is the price",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Answered",
+    "timestamp": "2026-04-10T17:25:19.946Z"
+  },
+  {
     "id": "mnss55pjvpzh",
     "from": "918758551131",
     "name": ".",
@@ -7,7 +40,7 @@
     "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Completed",
+    "status": null,
     "timestamp": "2026-04-10T10:45:26.695Z"
   },
   {
@@ -18,7 +51,7 @@
     "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Completed",
     "timestamp": "2026-04-10T10:35:11.373Z"
   },
   {
@@ -29,7 +62,7 @@
     "category": "feedback",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T10:33:59.607Z"
   },
   {
@@ -40,7 +73,7 @@
     "category": "feedback",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T10:32:50.731Z"
   },
   {
@@ -51,7 +84,7 @@
     "category": "feedback",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T10:32:25.494Z"
   },
   {
@@ -62,7 +95,7 @@
     "category": "feedback",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T10:32:19.542Z"
   },
   {
@@ -73,7 +106,7 @@
     "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "In Progress",
     "timestamp": "2026-04-10T10:32:15.544Z"
   },
   {
@@ -84,7 +117,7 @@
     "category": "complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Resolved",
     "timestamp": "2026-04-10T10:22:08.788Z"
   },
   {
@@ -95,7 +128,7 @@
     "category": "complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Open",
     "timestamp": "2026-04-10T10:21:41.784Z"
   },
   {
@@ -106,7 +139,7 @@
     "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T10:20:13.148Z"
   },
   {
@@ -117,7 +150,7 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Answered",
     "timestamp": "2026-04-10T10:11:45.546Z"
   },
   {
@@ -128,7 +161,7 @@
     "category": "invalid",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T09:58:14.406Z"
   },
   {
@@ -139,7 +172,7 @@
     "category": "invalid",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-10T09:56:49.920Z"
   },
   {
@@ -173,7 +206,7 @@
     "category": "Complaint",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "Pending",
+    "status": "Open",
     "timestamp": "2026-04-09T18:06:34.506Z"
   },
   {
@@ -184,7 +217,7 @@
     "category": "Complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Open",
     "timestamp": "2026-04-09T18:06:15.055Z"
   },
   {
@@ -206,7 +239,7 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": null,
     "timestamp": "2026-04-09T17:00:37.096Z"
   },
   {
@@ -217,7 +250,7 @@
     "category": "Complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "In Progress",
+    "status": "Resolved",
     "timestamp": "2026-04-09T17:00:10.258Z"
   },
   {
@@ -239,7 +272,7 @@
     "category": "Inquiry",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
+    "status": "Answered",
     "timestamp": "2026-04-09T16:49:20.394Z"
   },
   {
@@ -250,7 +283,8 @@
     "category": "Irrelevant",
     "confidence": 0.82,
     "source": "ML-Model",
-    "timestamp": "2026-04-08T19:26:17.502Z"
+    "timestamp": "2026-04-08T19:26:17.502Z",
+    "status": null
   },
   {
     "id": "mnqfu9jrcd2d",
@@ -260,7 +294,8 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:25:30.711Z"
+    "timestamp": "2026-04-08T19:25:30.711Z",
+    "status": null
   },
   {
     "id": "mnqftw0vgmtn",
@@ -270,7 +305,8 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:25:13.183Z"
+    "timestamp": "2026-04-08T19:25:13.183Z",
+    "status": null
   },
   {
     "id": "mnqft7wiuzao",
@@ -280,7 +316,8 @@
     "category": "Complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:24:41.922Z"
+    "timestamp": "2026-04-08T19:24:41.922Z",
+    "status": "Open"
   },
   {
     "id": "mnqfsyzau8jy",
@@ -300,7 +337,8 @@
     "category": "Complaint",
     "confidence": 0.82,
     "source": "ML-Model",
-    "timestamp": "2026-04-08T19:24:15.791Z"
+    "timestamp": "2026-04-08T19:24:15.791Z",
+    "status": "Open"
   },
   {
     "id": "mnqfngningx0",
@@ -310,7 +348,8 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:20:13.326Z"
+    "timestamp": "2026-04-08T19:20:13.326Z",
+    "status": null
   },
   {
     "id": "mnqfn9ytogan",
@@ -320,7 +359,8 @@
     "category": "Inquiry",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:20:04.661Z"
+    "timestamp": "2026-04-08T19:20:04.661Z",
+    "status": "Not Answered"
   },
   {
     "id": "mnqfn1nx2lla",
@@ -330,7 +370,8 @@
     "category": "Inquiry",
     "confidence": 0.82,
     "source": "ML-Model",
-    "timestamp": "2026-04-08T19:19:53.901Z"
+    "timestamp": "2026-04-08T19:19:53.901Z",
+    "status": "Not Answered"
   },
   {
     "id": "mnqfm7yuddb2",
@@ -340,7 +381,8 @@
     "category": "Inquiry",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:19:15.414Z"
+    "timestamp": "2026-04-08T19:19:15.414Z",
+    "status": "Not Answered"
   },
   {
     "id": "mnqfll4a32r8",
@@ -350,7 +392,8 @@
     "category": "Complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:18:45.802Z"
+    "timestamp": "2026-04-08T19:18:45.802Z",
+    "status": "Open"
   },
   {
     "id": "mnqflb56kafs",
@@ -370,7 +413,8 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:04:12.961Z"
+    "timestamp": "2026-04-08T19:04:12.961Z",
+    "status": null
   },
   {
     "id": "mnqf0d1edeva",
@@ -380,7 +424,8 @@
     "category": "Irrelevant",
     "confidence": 1,
     "source": "Rule-Based",
-    "timestamp": "2026-04-08T19:02:15.554Z"
+    "timestamp": "2026-04-08T19:02:15.554Z",
+    "status": null
   },
   {
     "id": "mnqezoy1xt7b",
@@ -390,7 +435,8 @@
     "category": "Irrelevant",
     "confidence": 0.82,
     "source": "ML-Model",
-    "timestamp": "2026-04-08T19:01:44.329Z"
+    "timestamp": "2026-04-08T19:01:44.329Z",
+    "status": null
   },
   {
     "id": "mnqezgmz9q60",
@@ -400,7 +446,8 @@
     "category": "Irrelevant",
     "confidence": 0.82,
     "source": "ML-Model",
-    "timestamp": "2026-04-08T19:01:33.563Z"
+    "timestamp": "2026-04-08T19:01:33.563Z",
+    "status": null
   },
   {
     "id": "mnqez91yp4u1",
@@ -431,7 +478,8 @@
     "category": "invalid",
     "confidence": 0,
     "source": "unknown",
-    "timestamp": "2026-04-08T18:44:11.655Z"
+    "timestamp": "2026-04-08T18:44:11.655Z",
+    "status": null
   },
   {
     "id": "mngymht0c3k0",
@@ -451,7 +499,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-12T05:54:38.691Z"
+    "timestamp": "2026-03-12T05:54:38.691Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmn1y9k64902",
@@ -461,7 +510,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-12T05:53:41.862Z"
+    "timestamp": "2026-03-12T05:53:41.862Z",
+    "status": "Open"
   },
   {
     "id": "mmn1xxqfaco7",
@@ -481,7 +531,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:49:25.696Z"
+    "timestamp": "2026-03-11T06:49:25.696Z",
+    "status": null
   },
   {
     "id": "mmlohfbkxog3",
@@ -501,7 +552,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:46:48.638Z"
+    "timestamp": "2026-03-11T06:46:48.638Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlni5vn9j30",
@@ -521,7 +573,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:20:54.918Z"
+    "timestamp": "2026-03-11T06:20:54.918Z",
+    "status": null
   },
   {
     "id": "mmlngoi3uta7",
@@ -531,7 +584,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:20:20.619Z"
+    "timestamp": "2026-03-11T06:20:20.619Z",
+    "status": "Open"
   },
   {
     "id": "mmlngf64g2w1",
@@ -541,7 +595,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:20:08.524Z"
+    "timestamp": "2026-03-11T06:20:08.524Z",
+    "status": null
   },
   {
     "id": "mmlng4tlpcke",
@@ -551,7 +606,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:19:55.113Z"
+    "timestamp": "2026-03-11T06:19:55.113Z",
+    "status": "Open"
   },
   {
     "id": "mmlnfh8buiaf",
@@ -561,7 +617,8 @@
     "category": "invalid",
     "confidence": 0.2834068619738036,
     "source": "model",
-    "timestamp": "2026-03-11T06:19:24.539Z"
+    "timestamp": "2026-03-11T06:19:24.539Z",
+    "status": null
   },
   {
     "id": "mmlneuiztup7",
@@ -571,7 +628,8 @@
     "category": "invalid",
     "confidence": 0.2495337316385378,
     "source": "model",
-    "timestamp": "2026-03-11T06:18:55.115Z"
+    "timestamp": "2026-03-11T06:18:55.115Z",
+    "status": null
   },
   {
     "id": "mmlne5z60fhy",
@@ -581,7 +639,8 @@
     "category": "invalid",
     "confidence": 0.42709500036986053,
     "source": "model",
-    "timestamp": "2026-03-11T06:18:23.298Z"
+    "timestamp": "2026-03-11T06:18:23.298Z",
+    "status": null
   },
   {
     "id": "mmlmsagnipp9",
@@ -591,7 +650,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:01:22.679Z"
+    "timestamp": "2026-03-11T06:01:22.679Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlms6nlj7g6",
@@ -601,7 +661,8 @@
     "category": "invalid",
     "confidence": 0.3216883011661547,
     "source": "model",
-    "timestamp": "2026-03-11T06:01:17.745Z"
+    "timestamp": "2026-03-11T06:01:17.745Z",
+    "status": null
   },
   {
     "id": "mmlmq9ocw6wj",
@@ -612,7 +673,7 @@
     "confidence": 0.2307228803653226,
     "source": "model",
     "timestamp": "2026-03-11T05:59:48.348Z",
-    "status": "In Progress"
+    "status": null
   },
   {
     "id": "mmlmppy7psyr",
@@ -623,7 +684,7 @@
     "confidence": 1,
     "source": "rule",
     "timestamp": "2026-03-11T05:59:22.783Z",
-    "status": "In Progress"
+    "status": "Not Answered"
   },
   {
     "id": "mmlmpdujtypr",
@@ -634,7 +695,7 @@
     "confidence": 1,
     "source": "rule",
     "timestamp": "2026-03-11T05:59:07.099Z",
-    "status": "In Progress"
+    "status": "Open"
   },
   {
     "id": "mmlmod3fi4q2",
@@ -666,7 +727,8 @@
     "category": "feedback",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:54:16.536Z"
+    "timestamp": "2026-03-11T05:54:16.536Z",
+    "status": null
   },
   {
     "id": "mmlmj0v51dwv",
@@ -676,7 +738,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:54:10.337Z"
+    "timestamp": "2026-03-11T05:54:10.337Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlmish9w1sc",
@@ -686,7 +749,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:53:59.469Z"
+    "timestamp": "2026-03-11T05:53:59.469Z",
+    "status": "Open"
   },
   {
     "id": "mmlmilo1fsln",
@@ -716,7 +780,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T09:13:43.390Z"
+    "timestamp": "2026-03-10T09:13:43.390Z",
+    "status": null
   },
   {
     "id": "mmke6wpg55wh",
@@ -726,7 +791,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T09:13:01.972Z"
+    "timestamp": "2026-03-10T09:13:01.972Z",
+    "status": null
   },
   {
     "id": "mmke6rweulfa",
@@ -746,7 +812,8 @@
     "category": "invalid",
     "confidence": 0.2307228803653226,
     "source": "model",
-    "timestamp": "2026-03-10T08:54:14.800Z"
+    "timestamp": "2026-03-10T08:54:14.800Z",
+    "status": null
   },
   {
     "id": "mmkdilpt7oto",
@@ -756,7 +823,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T08:54:07.985Z"
+    "timestamp": "2026-03-10T08:54:07.985Z",
+    "status": null
   },
   {
     "id": "mmkdii1zuwfi",
@@ -766,7 +834,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T08:54:03.239Z"
+    "timestamp": "2026-03-10T08:54:03.239Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmkdia0cdztr",
@@ -776,7 +845,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T08:53:52.812Z"
+    "timestamp": "2026-03-10T08:53:52.812Z",
+    "status": "Open"
   },
   {
     "id": "mmkdi4aevkxd",
@@ -796,7 +866,8 @@
     "category": "invalid",
     "confidence": 0.30972461992335437,
     "source": "model",
-    "timestamp": "2026-03-10T08:53:33.973Z"
+    "timestamp": "2026-03-10T08:53:33.973Z",
+    "status": null
   },
   {
     "id": "mmkabb8nbh1r",
@@ -806,7 +877,8 @@
     "category": "invalid",
     "confidence": 0.48745919732121656,
     "source": "model",
-    "timestamp": "2026-03-10T07:24:28.967Z"
+    "timestamp": "2026-03-10T07:24:28.967Z",
+    "status": null
   },
   {
     "id": "mmkab7tfsjk2",
@@ -816,7 +888,8 @@
     "category": "feedback",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:24.531Z"
+    "timestamp": "2026-03-10T07:24:24.531Z",
+    "status": null
   },
   {
     "id": "mmkab3ltm03a",
@@ -826,7 +899,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:19.074Z"
+    "timestamp": "2026-03-10T07:24:19.074Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmkaavkrbnm0",
@@ -836,7 +910,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:08.667Z"
+    "timestamp": "2026-03-10T07:24:08.667Z",
+    "status": "Open"
   },
   {
     "id": "mmkaan1olbdc",

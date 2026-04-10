@@ -8,7 +8,15 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { BarChart, PieChart } from 'react-native-chart-kit';
+import { PieChart } from 'react-native-chart-kit';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withTiming, 
+  interpolateColor 
+} from 'react-native-reanimated';
+import { Pressable } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
 import { getStats } from '../services/api';
 
@@ -20,7 +28,9 @@ export default function Analytics() {
 
   const [stats, setStats] = useState({
     total: 0, orders: 0, complaints: 0, inquiries: 0, feedback: 0, invalid: 0,
-    completed: 0, pending: 0, inProgress: 0,
+    orderPending: 0, orderInProgress: 0, orderCompleted: 0,
+    complaintOpen: 0, complaintResolved: 0,
+    inquiryNotAnswered: 0, inquiryAnswered: 0,
   });
 
   const [insights, setInsights] = useState({
@@ -42,7 +52,7 @@ export default function Analytics() {
     loadData();
     const interval = setInterval(() => {
       loadData();
-    }, 1500);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -81,7 +91,9 @@ export default function Analytics() {
     }
   };
 
-  const hasPieData = (stats.completed + stats.pending + stats.inProgress) > 0;
+  const hasOrderData = (stats.orderCompleted + stats.orderPending + stats.orderInProgress) > 0;
+  const hasComplaintData = (stats.complaintOpen + stats.complaintResolved) > 0;
+  const hasInquiryData = (stats.inquiryNotAnswered + stats.inquiryAnswered) > 0;
 
   if (loading) {
     return (
@@ -144,77 +156,78 @@ export default function Analytics() {
         Data Overview
       </Text>
 
-      <BarChart
-        data={{
-          labels: ["Orders", "Complaints", "Inquiries", "Feedback", "Invalid"],
-          datasets: [{
-            data: [
-              stats.orders,
-              stats.complaints,
-              stats.inquiries,
-              stats.feedback,
-              stats.invalid
-            ]
-          }]
-        }}
-        width={screenWidth - 40}
-        height={220}
-        yAxisLabel=""
-        yAxisSuffix=""
-        chartConfig={{
-          backgroundGradientFrom: card,
-          backgroundGradientTo: card,
-          color: () => darkMode ? "#4CAF50" : "#3b82f6",
-          labelColor: () => text
-        }}
-        style={{ borderRadius: 12 }}
+      <AnimatedBarChart 
+        stats={stats} 
+        darkMode={darkMode} 
+        text={text} 
+        card={card}
       />
 
-      {/* PIE CHART */}
-      <Text style={[styles.chartTitle, { color: text }]}>
-        Status Distribution
-      </Text>
-
-      {hasPieData ? (
-        <PieChart
-          data={[
-            {
-              name: "Completed",
-              population: stats.completed,
-              color: "#22c55e",
-              legendFontColor: text,
-              legendFontSize: 12
-            },
-            {
-              name: "Pending",
-              population: stats.pending,
-              color: "#facc15",
-              legendFontColor: text,
-              legendFontSize: 12
-            },
-            {
-              name: "In Progress",
-              population: stats.inProgress,
-              color: "#3b82f6",
-              legendFontColor: text,
-              legendFontSize: 12
-            }
-          ]}
-          width={screenWidth - 40}
-          height={220}
-          accessor="population"
-          chartConfig={{
-            backgroundGradientFrom: card,
-            backgroundGradientTo: card,
-            color: () => "#ffffffff"
-          }}
-          style={{ borderRadius: 12 }}
-        />
-      ) : (
-        <View style={[styles.card, { backgroundColor: card, marginTop: 10, alignItems: 'center' }]}>
-          <Text style={{ color: text }}>No status data yet</Text>
+      {/* STATUS PIE CHARTS GRID */}
+      <View style={styles.grid}>
+        
+        {/* ORDERS PIE */}
+        <View style={[styles.gridItem, { backgroundColor: card }]}>
+          <Text style={[styles.gridTitle, { color: text }]}>Orders</Text>
+          {hasOrderData ? (
+            <PieChart
+              data={[
+                { name: "Done", population: stats.orderCompleted, color: "#22c55e", legendFontColor: text, legendFontSize: 10 },
+                { name: "Progress", population: stats.orderInProgress, color: "#3b82f6", legendFontColor: text, legendFontSize: 10 },
+                { name: "Pending", population: stats.orderPending, color: "#94a3b8", legendFontColor: text, legendFontSize: 10 }
+              ]}
+              width={screenWidth / 3} height={100} accessor="population"
+              chartConfig={{ color: () => text }}
+              hasLegend={false}
+              paddingLeft="15"
+              style={{ alignSelf: 'center' }}
+            />
+          ) : (
+            <Text style={{ color: text, fontSize: 10 }}>No Data</Text>
+          )}
         </View>
-      )}
+
+        {/* COMPLAINTS PIE */}
+        <View style={[styles.gridItem, { backgroundColor: card }]}>
+          <Text style={[styles.gridTitle, { color: text }]}>Complaints</Text>
+          {hasComplaintData ? (
+            <PieChart
+              data={[
+                { name: "Resolved", population: stats.complaintResolved, color: "#22c55e", legendFontColor: text, legendFontSize: 10 },
+                { name: "Open", population: stats.complaintOpen, color: "#ef4444", legendFontColor: text, legendFontSize: 10 }
+              ]}
+              width={screenWidth / 3} height={100} accessor="population"
+              chartConfig={{ color: () => text }}
+              hasLegend={false}
+              paddingLeft="15"
+              style={{ alignSelf: 'center' }}
+            />
+          ) : (
+            <Text style={{ color: text, fontSize: 10 }}>No Data</Text>
+          )}
+        </View>
+
+        {/* INQUIRIES PIE */}
+        <View style={[styles.gridItem, { backgroundColor: card }]}>
+          <Text style={[styles.gridTitle, { color: text }]}>Inquiries</Text>
+          {hasInquiryData ? (
+            <PieChart
+              data={[
+                { name: "Answered", population: stats.inquiryAnswered, color: "#22c55e", legendFontColor: text, legendFontSize: 10 },
+                { name: "Pending", population: stats.inquiryNotAnswered, color: "#facc15", legendFontColor: text, legendFontSize: 10 }
+              ]}
+              width={screenWidth / 3} height={100} accessor="population"
+              chartConfig={{ color: () => text }}
+              hasLegend={false}
+              paddingLeft="15"
+              style={{ alignSelf: 'center' }}
+            />
+          ) : (
+            <Text style={{ color: text, fontSize: 10 }}>No Data</Text>
+          )}
+        </View>
+
+      </View>
 
       {/* INSIGHTS */}
       <View style={styles.insights}>
@@ -298,6 +311,154 @@ const styles = StyleSheet.create({
   insightTitle: {
     fontWeight: 'bold',
     marginBottom: 5
+  },
+
+  grid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20
+  },
+  gridItem: {
+    width: '31%',
+    padding: 10,
+    borderRadius: 15,
+    alignItems: 'center',
+    elevation: 3
+  },
+  gridTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 5
   }
 
+});
+
+// 📊 COMPONENT: ANIMATED BAR CHART
+function AnimatedBarChart({ stats, darkMode, text, card }) {
+  const chartData = [
+    { label: "Orders", value: stats.orders, color: "#3b82f6" },
+    { label: "Complaints", value: stats.complaints, color: "#ef4444" },
+    { label: "Inquiries", value: stats.inquiries, color: "#f59e0b" },
+    { label: "Feedback", value: stats.feedback, color: "#10b981" },
+    { label: "Invalid", value: stats.invalid, color: "#6b7280" },
+  ];
+
+  const maxValue = Math.max(...chartData.map(d => d.value), 10);
+
+  return (
+    <View style={[chartStyles.container, { backgroundColor: card }]}>
+      <View style={chartStyles.chartArea}>
+        {chartData.map((item, index) => (
+          <BarItem 
+            key={index} 
+            item={item} 
+            maxValue={maxValue} 
+            darkMode={darkMode} 
+            text={text} 
+          />
+        ))}
+      </View>
+      <View style={chartStyles.labels}>
+        {chartData.map((item, index) => (
+          <Text key={index} style={[chartStyles.labelText, { color: text }]}>
+            {item.label}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function BarItem({ item, maxValue, text }) {
+  const height = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0.8);
+
+  useEffect(() => {
+    height.value = withTiming((item.value / maxValue) * 150, { duration: 1000 });
+  }, [item.value, maxValue]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    height: height.value,
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(1.1, { duration: 150 });
+    opacity.value = withTiming(1, { duration: 150 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+    opacity.value = withTiming(0.8);
+  };
+
+  return (
+    <View style={chartStyles.barContainer}>
+      <Text style={[chartStyles.valueText, { color: text }]}>{item.value}</Text>
+      <Pressable 
+        onPressIn={handlePressIn} 
+        onPressOut={handlePressOut}
+        style={{ alignItems: 'center' }}
+      >
+        <Animated.View 
+          style={[
+            chartStyles.bar, 
+            { backgroundColor: item.color }, 
+            animatedStyle
+          ]} 
+        />
+      </Pressable>
+    </View>
+  );
+}
+
+const chartStyles = StyleSheet.create({
+  container: {
+    padding: 20,
+    borderRadius: 20,
+    marginTop: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  chartArea: {
+    height: 180,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-around',
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  barContainer: {
+    alignItems: 'center',
+    width: '18%',
+  },
+  bar: {
+    width: '100%',
+    minWidth: 30,
+    borderRadius: 8,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  labels: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+  },
+  labelText: {
+    fontSize: 10,
+    fontWeight: '600',
+    width: '18%',
+    textAlign: 'center',
+  },
+  valueText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  }
 });

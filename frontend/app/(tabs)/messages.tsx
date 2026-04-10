@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { ThemeContext } from '../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getMessages, updateMessageStatus } from '../services/api';
@@ -38,7 +39,14 @@ export default function MessagesScreen() {
   const [customers, setCustomers] = useState<CustomerGroup[]>([]);
   const [selectedCustomerFrom, setSelectedCustomerFrom] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'In Progress' | 'Completed'>('All');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Needs Action' | 'In Progress' | 'Done'>('All');
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    if (params.customerFrom) {
+      setSelectedCustomerFrom(params.customerFrom as string);
+    }
+  }, [params.customerFrom]);
 
   const bg = darkMode ? '#0f0f0f' : '#f5f7fa';
   const card = darkMode ? '#1c1c1e' : '#fff';
@@ -104,11 +112,23 @@ export default function MessagesScreen() {
     fetchData(true);
   };
 
-  const handleStatusUpdate = async (msgId: string, currentStatus: string) => {
+  const handleStatusUpdate = async (msgId: string, currentStatus: string, category: string) => {
     // Normalize case for comparison
     const normalizedStatus = currentStatus.toLowerCase();
-    const nextStatus = normalizedStatus === 'pending' ? 'In Progress' : 
-                      normalizedStatus === 'in progress' ? 'Completed' : 'Pending';
+    const cat = category.toLowerCase();
+    
+    let nextStatus = currentStatus;
+    
+    if (cat === 'orders' || cat === 'order') {
+      nextStatus = normalizedStatus === 'pending' ? 'In Progress' : 
+                   normalizedStatus === 'in progress' ? 'Completed' : 'Pending';
+    } else if (cat === 'complaints' || cat === 'complaint') {
+      nextStatus = normalizedStatus === 'open' ? 'Resolved' : 'Open';
+    } else if (cat === 'inquiries' || cat === 'inquiry') {
+      nextStatus = normalizedStatus === 'not answered' ? 'Answered' : 'Not Answered';
+    } else {
+      return; // no status for feedback/invalid
+    }
     
     // Optimistic UI update: update local state instantly
     setCustomers(prevCustomers => {
@@ -156,7 +176,13 @@ export default function MessagesScreen() {
 
     // Apply status filter
     if (statusFilter !== 'All') {
-      msgs = msgs.filter(m => (m.status || 'Pending').toLowerCase() === statusFilter.toLowerCase());
+      msgs = msgs.filter(m => {
+        const s = (m.status || '').toLowerCase();
+        if (statusFilter === 'Needs Action') return s === 'pending' || s === 'open' || s === 'not answered';
+        if (statusFilter === 'In Progress') return s === 'in progress';
+        if (statusFilter === 'Done') return s === 'completed' || s === 'resolved' || s === 'answered';
+        return false;
+      });
     }
 
     return msgs;
@@ -195,7 +221,7 @@ export default function MessagesScreen() {
           {/* Status Filter Bar */}
           <View style={[styles.filterBar, { borderBottomColor: border }]}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-              {(['All', 'Pending', 'In Progress', 'Completed'] as const).map((status) => (
+              {(['All', 'Needs Action', 'In Progress', 'Done'] as const).map((status) => (
                 <TouchableOpacity
                   key={status}
                   activeOpacity={0.7}
@@ -234,15 +260,17 @@ export default function MessagesScreen() {
                         {msg.category.toUpperCase()}
                       </Text>
                     </View>
-                    <TouchableOpacity 
-                      activeOpacity={0.6}
-                      onPress={() => handleStatusUpdate(msg.id, msg.status || 'Pending')}
-                      style={[styles.statusBadge, { borderColor: (msg.status === 'Completed' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af') }]}
-                    >
-                      <Text style={{ color: (msg.status === 'Completed' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af'), fontSize: 10, fontWeight: '700' }}>
-                        {msg.status || 'Pending'}
-                      </Text>
-                    </TouchableOpacity>
+                    {!['feedback', 'invalid'].includes(msg.category.toLowerCase()) && (
+                      <TouchableOpacity 
+                        activeOpacity={0.6}
+                        onPress={() => handleStatusUpdate(msg.id, msg.status || '', msg.category)}
+                        style={[styles.statusBadge, { borderColor: (msg.status === 'Completed' || msg.status === 'Resolved' || msg.status === 'Answered' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af') }]}
+                      >
+                        <Text style={{ color: (msg.status === 'Completed' || msg.status === 'Resolved' || msg.status === 'Answered' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af'), fontSize: 10, fontWeight: '700' }}>
+                          {msg.status || 'Pending'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   <Text style={[styles.chatDate, { color: subText }]}>
                     {new Date(msg.timestamp).toLocaleDateString()} {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

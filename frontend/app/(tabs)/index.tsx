@@ -6,25 +6,30 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { ThemeContext } from '../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getStats, getMessages } from '../services/api';
 
 type MessageItem = {
   id: string;
+  from: string;
   message: string;
   category: string;
   name: string;
   timestamp: string;
+  status?: string;
+  statusUpdatedAt?: string;
 };
 
 export default function HomeScreen() {
-
+  const router = useRouter();
   const { darkMode } = useContext(ThemeContext);
 
   const [stats, setStats] = useState({ total: 0, orders: 0, complaints: 0, inquiries: 0, feedback: 0, invalid: 0 });
-  const [recentMessages, setRecentMessages] = useState<MessageItem[]>([]);
+  const [reminderMessages, setReminderMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -37,7 +42,28 @@ export default function HomeScreen() {
     try {
       const [statsData, messagesData] = await Promise.all([getStats(), getMessages()]);
       setStats(statsData);
-      setRecentMessages(messagesData.slice(0, 5));
+      
+      const now = new Date().getTime();
+      const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
+      
+      const reminders = messagesData.filter((msg: MessageItem) => {
+        const timeToUse = msg.statusUpdatedAt || msg.timestamp;
+        const msgTime = new Date(timeToUse).getTime();
+        const isOld = (now - msgTime) >= FOUR_DAYS_MS;
+        
+        const cat = msg.category ? msg.category.toLowerCase() : '';
+        if (cat === 'feedback' || cat === 'invalid' || cat === 'irrelevant') return false;
+        
+        // Default to pending if it's an actionable category but missing an explicit status (from old datasets)
+        const s = msg.status ? msg.status.toLowerCase() : 'pending';
+        const isPending = !(s === 'completed' || s === 'resolved' || s === 'answered');
+        
+        return isOld && isPending;
+      });
+      
+      reminders.sort((a: MessageItem, b: MessageItem) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      
+      setReminderMessages(reminders);
     } catch (err) {
       console.log('Error fetching dashboard data:', err);
     } finally {
@@ -112,30 +138,57 @@ export default function HomeScreen() {
             <Text style={[styles.number, { color: '#f59e0b' }]}>{stats.feedback}</Text>
           </View>
 
-          <View style={[styles.card, { backgroundColor: card }]}>
-            <Text style={{ color: subText, fontSize: 12 }}>Invalid</Text>
-            <Text style={[styles.number, { color: text }]}>{stats.invalid}</Text>
+          <View style={[styles.card, { backgroundColor: darkMode ? '#3f1d1d' : '#fee2e2', borderWidth: 1, borderColor: '#ef4444' }]}>
+            <Text style={{ color: '#ef4444', fontSize: 12, fontWeight: 'bold' }}>Reminders</Text>
+            <Text style={[styles.number, { color: '#ef4444' }]}>{reminderMessages.length}</Text>
           </View>
         </View>
 
-        {/* RECENT MESSAGES */}
-        <Text style={[styles.taskTitle, { color: text }]}>
-          Recent Messages
+        {/* REMINDER MESSAGES */}
+        <Text style={[styles.taskTitle, { color: '#ef4444' }]}>
+          ⚠️ Reminder Messages (Action Required)
         </Text>
 
-        {recentMessages.length === 0 ? (
-          <Text style={{ color: subText, marginTop: 12 }}>No messages yet. Send a WhatsApp message to get started!</Text>
+        {reminderMessages.length === 0 ? (
+          <Text style={{ color: subText, marginTop: 12 }}>No pending messages older than 4 days.</Text>
         ) : (
-          recentMessages.map((msg) => (
-            <View key={msg.id} style={[styles.task, { backgroundColor: card }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: text, fontWeight: '500' }} numberOfLines={1}>{msg.message}</Text>
-                <Text style={{ color: subText, fontSize: 12, marginTop: 4 }}>
-                  {msg.name} · {msg.category}
-                </Text>
+          reminderMessages.map((msg) => {
+            const timeToUse = msg.statusUpdatedAt || msg.timestamp;
+            const daysOld = Math.floor((new Date().getTime() - new Date(timeToUse).getTime()) / (1000 * 60 * 60 * 24));
+            return (
+              <View key={msg.id} style={[styles.task, { backgroundColor: card, borderLeftWidth: 4, borderLeftColor: '#ef4444', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 }]}>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <View style={{ backgroundColor: darkMode ? '#3f1d1d' : '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginRight: 6 }}>
+                      <Text style={{ color: '#ef4444', fontSize: 10, fontWeight: 'bold' }}>{msg.category.toUpperCase()}</Text>
+                    </View>
+                    <View style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                      <Text style={{ color: subText, fontSize: 10, fontWeight: 'bold' }}>{msg.status || 'Pending'}</Text>
+                    </View>
+                  </View>
+                  
+                  <Text style={{ color: text, fontWeight: '600', fontSize: 15, marginBottom: 4 }} numberOfLines={1}>
+                    {msg.message}
+                  </Text>
+                  
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 4 }}>
+                    <Text style={{ color: subText, fontSize: 12 }}>
+                      {msg.name} · {new Date(msg.timestamp).toLocaleDateString()}
+                    </Text>
+                    <Text style={{ color: '#ef4444', fontSize: 12, fontWeight: 'bold' }}>
+                      ⚠️ {daysOld} days late
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity 
+                  style={{ backgroundColor: '#ef4444', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, justifyContent: 'center', marginLeft: 12 }}
+                  onPress={() => router.push({ pathname: '/messages', params: { customerFrom: msg.from } })}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Address</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
 
       </ScrollView>

@@ -71,7 +71,7 @@ function saveUsers(users) {
 function normalizeCategory(cat) {
   if (!cat) return "invalid";
   const lower = cat.toLowerCase();
-  if (lower === "order" || lower === "ordering" || lower === "logistic" || lower === "logistics") return "orders";
+  if (lower === "order" || lower === "ordering") return "orders";
   if (lower === "complaint") return "complaints";
   if (lower === "inquiry") return "inquiries";
   if (lower === "feedback") return "feedback";
@@ -160,7 +160,7 @@ app.post("/webhook", (req, res) => {
                 category: "pending",
                 confidence: 0,
                 source: "pending",
-                status: "Pending",
+                status: null,
                 timestamp: new Date().toISOString(),
               };
 
@@ -194,6 +194,8 @@ app.post("/webhook", (req, res) => {
                   }
 
                   record.category = category;
+                  const defaultStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
+                  record.status = defaultStatuses[category] !== undefined ? defaultStatuses[category] : null;
                   record.confidence = result.confidence || 0;
                   record.source = result.source || "unknown";
                   addMessage(record);
@@ -228,14 +230,10 @@ app.get("/api/stats", (req, res) => {
   const messages = loadMessages();
   const stats = {
     total: messages.length,
-    orders: 0,
-    complaints: 0,
-    inquiries: 0,
-    feedback: 0,
-    invalid: 0,
-    completed: 0,
-    pending: 0,
-    inProgress: 0,
+    orders: 0, orderPending: 0, orderInProgress: 0, orderCompleted: 0,
+    complaints: 0, complaintOpen: 0, complaintResolved: 0,
+    inquiries: 0, inquiryNotAnswered: 0, inquiryAnswered: 0,
+    feedback: 0, invalid: 0,
   };
   for (const m of messages) {
     const group = normalizeCategory(m.category);
@@ -244,10 +242,25 @@ app.get("/api/stats", (req, res) => {
     } else {
       stats.invalid++;
     }
-    const status = (m.status || "Pending");
-    if (status === "Completed") stats.completed++;
-    else if (status === "In Progress") stats.inProgress++;
-    else stats.pending++;
+    
+    // Category-specific statuses
+    let normalized = group === 'orders' ? 'order' : 
+                     group === 'complaints' ? 'complaint' : 
+                     group === 'inquiries' ? 'inquiry' : group;
+    
+    const status = m.status || "";
+    
+    if (normalized === "order") {
+      if (status === "Completed") stats.orderCompleted++;
+      else if (status === "In Progress") stats.orderInProgress++;
+      else stats.orderPending++;
+    } else if (normalized === "complaint") {
+      if (status === "Resolved") stats.complaintResolved++;
+      else stats.complaintOpen++;
+    } else if (normalized === "inquiry") {
+      if (status === "Answered") stats.inquiryAnswered++;
+      else stats.inquiryNotAnswered++;
+    }
   }
   res.json(stats);
 });
@@ -263,6 +276,7 @@ app.post("/categorize", async (req, res) => {
     const result = await categorizeMessage(message);
 
     // Also store it as a manually tested message
+    const defaultTestStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
     const record = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       from: "manual_test",
@@ -271,7 +285,7 @@ app.post("/categorize", async (req, res) => {
       category: result.category || "invalid",
       confidence: result.confidence || 0,
       source: result.source || "unknown",
-      status: "Pending",
+      status: defaultTestStatuses[result.category || "invalid"],
       timestamp: new Date().toISOString(),
     };
     addMessage(record);
@@ -327,7 +341,7 @@ app.get("/api/categories", (req, res) => {
     grouped[group].push({
       id: msg.id,
       name: msg.message,
-      status: msg.status || "Pending",
+      status: msg.status || (group === 'complaints' ? 'Open' : group === 'inquiries' ? 'Not Answered' : group === 'orders' ? 'Pending' : null),
       from: msg.from,
       contactName: msg.name,
       confidence: msg.confidence,
@@ -344,15 +358,19 @@ app.post("/api/categories/:category", async (req, res) => {
   const { name, status } = req.body;
   if (!name) return res.status(400).json({ error: "Name is required" });
   const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", feedback: "feedback", others: "invalid", invalid: "invalid" };
+  const actualCat = catMap[category] || "invalid";
+  const catDefaultStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
+  const finalStatus = status !== undefined ? status : catDefaultStatuses[actualCat];
+  
   const record = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     from: "manual_app",
     name: "App User",
     message: name,
-    category: catMap[category] || "invalid",
+    category: actualCat,
     confidence: 1,
     source: "manual",
-    status: status || "Pending",
+    status: finalStatus,
     timestamp: new Date().toISOString(),
   };
   addMessage(record);
@@ -390,6 +408,7 @@ app.patch("/api/messages/:id/status", async (req, res) => {
   if (!msg) return res.status(404).json({ error: "Message not found" });
   
   msg.status = status;
+  msg.statusUpdatedAt = new Date().toISOString();
   saveMessages(messages);
   res.json({ success: true, id, status });
 });
