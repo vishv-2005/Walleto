@@ -71,9 +71,9 @@ function saveUsers(users) {
 function normalizeCategory(cat) {
   if (!cat) return "invalid";
   const lower = cat.toLowerCase();
-  if (lower === "order" || lower === "ordering") return "orders";
-  if (lower === "complaint") return "complaints";
-  if (lower === "inquiry") return "inquiries";
+  if (lower === "order" || lower === "ordering" || lower === "orders") return "orders";
+  if (lower === "complaint" || lower === "complaints") return "complaints";
+  if (lower === "inquiry" || lower === "inquiries") return "inquiries";
   if (lower === "feedback") return "feedback";
   return "invalid";
 }
@@ -167,7 +167,11 @@ app.post("/webhook", (req, res) => {
               // Categorize and update the record
               categorizeMessage(text)
                 .then((result) => {
-                  const category = result.category || "invalid";
+                  // --- Fast-Track Inquiry Detection ---
+                  const inquiryRuleKeywords = ["price", "cost", "available", "when", "how", "where", "info", "details", "product"];
+                  const isInquiryRule = inquiryRuleKeywords.some(kw => text.toLowerCase().includes(kw));
+
+                  const category = isInquiryRule ? "inquiry" : (result.category || "invalid");
                   
                   // --- Order Update Detection Logic ---
                   if (category === "order") {
@@ -229,6 +233,7 @@ app.get("/api/messages", (req, res) => {
 app.get("/api/stats", (req, res) => {
   const messages = loadMessages();
   const stats = {
+    version: "1.0.1",
     total: messages.length,
     orders: 0, orderPending: 0, orderInProgress: 0, orderCompleted: 0,
     complaints: 0, complaintOpen: 0, complaintResolved: 0,
@@ -244,24 +249,33 @@ app.get("/api/stats", (req, res) => {
     }
     
     // Category-specific statuses
-    let normalized = group === 'orders' ? 'order' : 
-                     group === 'complaints' ? 'complaint' : 
-                     group === 'inquiries' ? 'inquiry' : group;
+    const norm = group.toLowerCase();
+    const st = (m.status || "").toLowerCase();
     
-    const status = m.status || "";
-    
-    if (normalized === "order") {
-      if (status === "Completed") stats.orderCompleted++;
-      else if (status === "In Progress") stats.orderInProgress++;
+    if (norm.includes("order")) {
+      if (st.includes("completed")) stats.orderCompleted++;
+      else if (st.includes("progress")) stats.orderInProgress++;
       else stats.orderPending++;
-    } else if (normalized === "complaint") {
-      if (status === "Resolved") stats.complaintResolved++;
+    } else if (norm.includes("complaint")) {
+      if (st.includes("resolved")) stats.complaintResolved++;
       else stats.complaintOpen++;
-    } else if (normalized === "inquiry") {
-      if (status === "Answered") stats.inquiryAnswered++;
-      else stats.inquiryNotAnswered++;
+    } else if (norm.includes("inquir")) {
+      const lowerSt = st.toLowerCase();
+      const lowerMsg = (m.message || "").toLowerCase();
+      
+      // Fast-Track Logic: If it contains inquiry keywords, treat as inquiry
+      const inquiryKeywords = ["price", "cost", "available", "when", "how", "where", "info", "details"];
+      const isForceInquiry = inquiryKeywords.some(kw => lowerMsg.includes(kw));
+
+      if (lowerSt === "answered" || lowerSt.includes("done")) {
+        stats.inquiryAnswered++;
+      } else {
+        stats.inquiryNotAnswered++;
+      }
     }
   }
+  
+  stats.version = "1.0.3";
   res.json(stats);
 });
 

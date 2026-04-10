@@ -7,8 +7,9 @@
     "category": "order",
     "confidence": 0.82,
     "source": "ML-Model",
-    "status": "In Progress",
-    "timestamp": "2026-04-10T18:24:47.210Z"
+    "status": "Completed",
+    "timestamp": "2026-04-10T18:24:47.210Z",
+    "statusUpdatedAt": "2026-04-10T19:52:02.517Z"
   },
   {
     "id": "mnt7wckguup7",
@@ -128,7 +129,7 @@
     "category": "complaint",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Open",
+    "status": "Resolved",
     "timestamp": "2026-04-10T10:21:41.784Z"
   },
   {
@@ -150,7 +151,7 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Answered",
+    "status": "Not Answered",
     "timestamp": "2026-04-10T10:11:45.546Z"
   },
   {
@@ -180,7 +181,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "I want 4 cakes",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "status": "Completed",
@@ -191,7 +192,7 @@
     "from": "917874068891",
     "name": "Hir Ray",
     "message": "2 cake ka order karna hai",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "status": "Pending",
@@ -225,7 +226,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "Instead of 5 I want only 3 cakes",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "status": "Completed",
@@ -236,7 +237,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "Bdbdb",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "status": null,
@@ -258,11 +259,12 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "I want 5 cakes",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
-    "status": "Pending",
-    "timestamp": "2026-04-09T16:55:04.404Z"
+    "status": "In Progress",
+    "timestamp": "2026-04-09T16:55:04.404Z",
+    "statusUpdatedAt": "2026-04-10T19:52:14.702Z"
   },
   {
     "id": "mnrppa16xcz1",
@@ -280,7 +282,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "I love this cakes",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 0.82,
     "source": "ML-Model",
     "timestamp": "2026-04-08T19:26:17.502Z",
@@ -291,7 +293,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "Manali chaloge?",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:25:30.711Z",
@@ -302,7 +304,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "Ghumne jana hai",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:25:13.183Z",
@@ -324,7 +326,7 @@
     "from": "918488045303",
     "name": "Vishv Patel",
     "message": "Muje 2 cake chahiye",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:24:30.358Z"
@@ -345,7 +347,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "cake bhej diya ?",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:20:13.326Z",
@@ -360,7 +362,7 @@
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:20:04.661Z",
-    "status": "Not Answered"
+    "status": "Answered"
   },
   {
     "id": "mnqfn1nx2lla",
@@ -400,7 +402,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "muje 2 cakes chahiy",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:18:32.874Z"
@@ -410,7 +412,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "bro iska rate batao bro",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:04:12.961Z",
@@ -421,7 +423,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "bro iska rate batao",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:02:15.554Z",
@@ -432,7 +434,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "cake bigde huwe hai",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 0.82,
     "source": "ML-Model",
     "timestamp": "2026-04-08T19:01:44.329Z",
@@ -443,7 +445,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "cake acche nahi hai",
-    "category": "Irrelevant",
+    "category": "invalid",
     "confidence": 0.82,
     "source": "ML-Model",
     "timestamp": "2026-04-08T19:01:33.563Z",
@@ -454,7 +456,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "muje 2 cake chahiye",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:01:23.734Z",
@@ -465,7 +467,7 @@
     "from": "manual_test",
     "name": "Manual Test",
     "message": "i want 2 cakes",
-    "category": "Ordering",
+    "category": "order",
     "confidence": 1,
     "source": "Rule-Based",
     "timestamp": "2026-04-08T19:01:08.212Z"
@@ -921,6 +923,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:23:57.612Z"
+    "timestamp": "2026-03-10T07:23:57.612Z",
+    "status": "Completed",
+    "statusUpdatedAt": "2026-04-10T20:08:57.388Z"
   }
 ]
