@@ -1,8 +1,12 @@
 import { Platform } from 'react-native';
 
-// Use your machine's local IP address so physical devices on the same Wi-Fi can connect
+// Use localhost for web, LAN IP for physical devices
 const getBaseUrl = (): string => {
-  return 'http://192.168.29.53:5000';
+  if (Platform.OS === 'web') {
+    return 'http://localhost:5000';
+  }
+  // For physical devices on the same Wi-Fi — update this IP if your network changes
+  return 'http://10.42.229.212:5000';
 };
 
 export const API_BASE = getBaseUrl();

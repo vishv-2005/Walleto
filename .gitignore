@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains API keys & secrets)
+backend/.env
+
+# Sensitive user data (contains passwords)
+backend/data/users.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,5 +1,83 @@
 [
   {
+    "id": "mntxa9pfsv51",
+    "from": "919998964510",
+    "name": "VATSAL PATEL",
+    "message": "Hi",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": null,
+    "timestamp": "2026-04-11T05:57:09.411Z"
+  },
+  {
+    "id": "mntx53woe7s2",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I love this cakes",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-11T05:53:08.616Z"
+  },
+  {
+    "id": "mntx2e4e24sp",
+    "from": "919998964510",
+    "name": "VATSAL PATEL",
+    "message": "lab ka submit karna hai ya next week?",
+    "category": "inquiry",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Answered",
+    "timestamp": "2026-04-11T05:51:01.886Z",
+    "statusUpdatedAt": "2026-04-11T06:00:23.146Z"
+  },
+  {
+    "id": "mntx0o9ul020",
+    "from": "919998964510",
+    "name": "VATSAL PATEL",
+    "message": "Bricks are extremely brittle and lack the required strength. Many of them are breaking easily during handling and construction, which is not acceptable.",
+    "category": "complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Open",
+    "timestamp": "2026-04-11T05:49:41.730Z"
+  },
+  {
+    "id": "mntwznzczgdn",
+    "from": "919624212534",
+    "name": "Harsh",
+    "message": "I am not satisfied with the service/product I received. It did not meet expectations and caused inconvenience. Please look into the issue and resolve it as soon as possible.",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Not Answered",
+    "timestamp": "2026-04-11T05:48:54.696Z"
+  },
+  {
+    "id": "mntwxnhy4jn0",
+    "from": "919624212534",
+    "name": "Harsh",
+    "message": "Hello,\n\nI am writing to express my dissatisfaction with the recent service/product I received from your company. The experience did not meet the expected standards, and it has caused inconvenience.\n\nI kindly request you to look into this issue and provide a prompt resolution. I would appreciate a quick response and appropriate action to prevent this from happening again.\n\nThank you.",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Not Answered",
+    "timestamp": "2026-04-11T05:47:20.758Z"
+  },
+  {
+    "id": "mntwwygouu7l",
+    "from": "919998964510",
+    "name": "VATSAL PATEL",
+    "message": "20kg cement \n10kg sand",
+    "category": "order",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Pending",
+    "timestamp": "2026-04-11T05:46:48.312Z"
+  },
+  {
     "id": "mnteyk7j87er",
     "from": "918488045303",
     "name": "Vishv Patel",
