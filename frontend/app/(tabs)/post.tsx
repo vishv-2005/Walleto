@@ -78,8 +78,8 @@ export default function PostGenerator() {
     setDownloading(true);
 
     try {
-      // 1. Request permissions
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      // 1. Request permissions (write-only to avoid requesting AUDIO on Android)
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'We need access to your photos to save the marketing banner.');
         setDownloading(false);
