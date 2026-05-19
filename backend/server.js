@@ -431,10 +431,10 @@ return ""
 Create a HIGH-END commercial AI photo prompt.
 
 The image must visually reflect:
-- business category
-- products/services
-- Indian festive mood if festival exists (represented visually through decorations, lights, flowers)
-- warm local-business feeling
+- business category and specific products/services (e.g., if it is a sweet shop, show delicious Indian laddoos and peda; if it is an electronics shop, show premium gadgets or circuit boards).
+- Indian festive mood and theme if a festival exists (represented visually through decorations, e.g. warm glowing diyas, clay lamps, and marigold garlands for Diwali; colorful powders for Holi; festive lights for Christmas).
+- warm, inviting local-business feeling that feels authentic and authentic.
+- The prompt MUST describe a highly contextual, rich, atmospheric scene that integrates these visual elements naturally.
 
 STYLE:
 - Luxury commercial photography
