@@ -1,5 +1,489 @@
 [
   {
+    "id": "mnt8jvjegi6h",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "i need 3 laptops",
+    "category": "order",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Completed",
+    "timestamp": "2026-04-10T18:24:47.210Z",
+    "statusUpdatedAt": "2026-04-10T19:52:02.517Z"
+  },
+  {
+    "id": "mnt7wckguup7",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are bad",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Resolved",
+    "timestamp": "2026-04-10T18:06:29.536Z"
+  },
+  {
+    "id": "mnt6ff0q1xrm",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "What is the price",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Answered",
+    "timestamp": "2026-04-10T17:25:19.946Z"
+  },
+  {
+    "id": "mnss55pjvpzh",
+    "from": "918758551131",
+    "name": ".",
+    "message": "1kg vadapav",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": null,
+    "timestamp": "2026-04-10T10:45:26.695Z"
+  },
+  {
+    "id": "mnsrryx9bicw",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Mujhe 2 piece chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Completed",
+    "timestamp": "2026-04-10T10:35:11.373Z"
+  },
+  {
+    "id": "mnsrqfjr8q3n",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I loved the product",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T10:33:59.607Z"
+  },
+  {
+    "id": "mnsroyej04nb",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "The product is excellent",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T10:32:50.731Z"
+  },
+  {
+    "id": "mnsroexi5lwa",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "The product is excellent",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T10:32:25.494Z"
+  },
+  {
+    "id": "mnsroac6svpl",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I loved the product",
+    "category": "feedback",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T10:32:19.542Z"
+  },
+  {
+    "id": "mnsro794ge6q",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Mujhe 2 piece chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "In Progress",
+    "timestamp": "2026-04-10T10:32:15.544Z"
+  },
+  {
+    "id": "mnsrb72sot7s",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I ordered a vanilla flavour cake aur uska taste bohot kharab tha",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Resolved",
+    "timestamp": "2026-04-10T10:22:08.788Z"
+  },
+  {
+    "id": "mnsram8oyyxw",
+    "from": "919512537083",
+    "name": "Hem Gabhawala",
+    "message": "I want inquiry about 50 bone china plates for a house party on date 20 April for one day so can tell. How it will cost ??",
+    "category": "complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Resolved",
+    "timestamp": "2026-04-10T10:21:41.784Z"
+  },
+  {
+    "id": "mnsr8pukvgeq",
+    "from": "919512537083",
+    "name": "Hem Gabhawala",
+    "message": "Hey",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": null,
+    "timestamp": "2026-04-10T10:20:13.148Z"
+  },
+  {
+    "id": "mnsqxu6imd9e",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "What is the price for the product",
+    "category": "inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Not Answered",
+    "timestamp": "2026-04-10T10:11:45.546Z"
+  },
+  {
+    "id": "mnsqggau0wo8",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are good",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T09:58:14.406Z"
+  },
+  {
+    "id": "mnsqen40v0as",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "the cakes are good",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": null,
+    "timestamp": "2026-04-10T09:56:49.920Z"
+  },
+  {
+    "id": "mnsnonsaalal",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want 4 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Completed",
+    "timestamp": "2026-04-10T08:40:38.506Z"
+  },
+  {
+    "id": "mnrshboe3zq7",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "2 cake ka order karna hai",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Pending",
+    "timestamp": "2026-04-09T18:07:08.126Z",
+    "notificationRead": true
+  },
+  {
+    "id": "mnrsglqijh3u",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "I am amazed by the product's quality",
+    "category": "Complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "status": "Open",
+    "timestamp": "2026-04-09T18:06:34.506Z"
+  },
+  {
+    "id": "mnrsg6q7h7ut",
+    "from": "917874068891",
+    "name": "Hir Ray",
+    "message": "Bohot kharab product tha",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Open",
+    "timestamp": "2026-04-09T18:06:15.055Z"
+  },
+  {
+    "id": "mnrq4gpnmfhp",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Instead of 5 I want only 3 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Completed",
+    "timestamp": "2026-04-09T17:01:08.891Z"
+  },
+  {
+    "id": "mnrq3s6gp4cm",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Bdbdb",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": null,
+    "timestamp": "2026-04-09T17:00:37.096Z"
+  },
+  {
+    "id": "mnrq37gynbrt",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "The cakes are not good",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Resolved",
+    "timestamp": "2026-04-09T17:00:10.258Z"
+  },
+  {
+    "id": "mnrpwnh0av5p",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want 5 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "In Progress",
+    "timestamp": "2026-04-09T16:55:04.404Z",
+    "statusUpdatedAt": "2026-04-10T19:52:14.702Z"
+  },
+  {
+    "id": "mnrppa16xcz1",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "What is the price of cake",
+    "category": "Inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "status": "Answered",
+    "timestamp": "2026-04-09T16:49:20.394Z"
+  },
+  {
+    "id": "mnqfv9nib7ug",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I love this cakes",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:26:17.502Z",
+    "status": null
+  },
+  {
+    "id": "mnqfu9jrcd2d",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Manali chaloge?",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:25:30.711Z",
+    "status": null
+  },
+  {
+    "id": "mnqftw0vgmtn",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Ghumne jana hai",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:25:13.183Z",
+    "status": null
+  },
+  {
+    "id": "mnqft7wiuzao",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Ye cake to bekar hai",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:24:41.922Z",
+    "status": "Open"
+  },
+  {
+    "id": "mnqfsyzau8jy",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "Muje 2 cake chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:24:30.358Z"
+  },
+  {
+    "id": "mnqfsnqn0m4u",
+    "from": "918488045303",
+    "name": "Vishv Patel",
+    "message": "I want two cakes",
+    "category": "Complaint",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:24:15.791Z",
+    "status": "Open"
+  },
+  {
+    "id": "mnqfngningx0",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bhej diya ?",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:20:13.326Z",
+    "status": null
+  },
+  {
+    "id": "mnqfn9ytogan",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bhej diya kya",
+    "category": "Inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:20:04.661Z",
+    "status": "Answered"
+  },
+  {
+    "id": "mnqfn1nx2lla",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake kab tak milega",
+    "category": "Inquiry",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:19:53.901Z",
+    "status": "Not Answered"
+  },
+  {
+    "id": "mnqfm7yuddb2",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake ka rate kya hai",
+    "category": "Inquiry",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:19:15.414Z",
+    "status": "Not Answered"
+  },
+  {
+    "id": "mnqfll4a32r8",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "ye cake bekaar hai",
+    "category": "Complaint",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:18:45.802Z",
+    "status": "Open"
+  },
+  {
+    "id": "mnqflb56kafs",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "muje 2 cakes chahiy",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:18:32.874Z"
+  },
+  {
+    "id": "mnqf2vmp3fc2",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "bro iska rate batao bro",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:04:12.961Z",
+    "status": null
+  },
+  {
+    "id": "mnqf0d1edeva",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "bro iska rate batao",
+    "category": "invalid",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:02:15.554Z",
+    "status": null
+  },
+  {
+    "id": "mnqezoy1xt7b",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake bigde huwe hai",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:01:44.329Z",
+    "status": null
+  },
+  {
+    "id": "mnqezgmz9q60",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "cake acche nahi hai",
+    "category": "invalid",
+    "confidence": 0.82,
+    "source": "ML-Model",
+    "timestamp": "2026-04-08T19:01:33.563Z",
+    "status": null
+  },
+  {
+    "id": "mnqez91yp4u1",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "muje 2 cake chahiye",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:01:23.734Z",
+    "status": "Completed"
+  },
+  {
+    "id": "mnqeyx2slea7",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "i want 2 cakes",
+    "category": "order",
+    "confidence": 1,
+    "source": "Rule-Based",
+    "timestamp": "2026-04-08T19:01:08.212Z"
+  },
+  {
+    "id": "mnqed4p3dd0g",
+    "from": "manual_test",
+    "name": "Manual Test",
+    "message": "i want two cakes",
+    "category": "invalid",
+    "confidence": 0,
+    "source": "unknown",
+    "timestamp": "2026-04-08T18:44:11.655Z",
+    "status": null
+  },
+  {
     "id": "mngymht0c3k0",
     "from": "918488045303",
     "name": "Vishv Patel",
@@ -17,7 +501,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-12T05:54:38.691Z"
+    "timestamp": "2026-03-12T05:54:38.691Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmn1y9k64902",
@@ -27,7 +512,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-12T05:53:41.862Z"
+    "timestamp": "2026-03-12T05:53:41.862Z",
+    "status": "Open"
   },
   {
     "id": "mmn1xxqfaco7",
@@ -47,7 +533,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:49:25.696Z"
+    "timestamp": "2026-03-11T06:49:25.696Z",
+    "status": null
   },
   {
     "id": "mmlohfbkxog3",
@@ -67,7 +554,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:46:48.638Z"
+    "timestamp": "2026-03-11T06:46:48.638Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlni5vn9j30",
@@ -87,7 +575,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:20:54.918Z"
+    "timestamp": "2026-03-11T06:20:54.918Z",
+    "status": null
   },
   {
     "id": "mmlngoi3uta7",
@@ -97,7 +586,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:20:20.619Z"
+    "timestamp": "2026-03-11T06:20:20.619Z",
+    "status": "Open"
   },
   {
     "id": "mmlngf64g2w1",
@@ -107,7 +597,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-11T06:20:08.524Z"
+    "timestamp": "2026-03-11T06:20:08.524Z",
+    "status": null
   },
   {
     "id": "mmlng4tlpcke",
@@ -117,7 +608,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:19:55.113Z"
+    "timestamp": "2026-03-11T06:19:55.113Z",
+    "status": "Open"
   },
   {
     "id": "mmlnfh8buiaf",
@@ -127,7 +619,8 @@
     "category": "invalid",
     "confidence": 0.2834068619738036,
     "source": "model",
-    "timestamp": "2026-03-11T06:19:24.539Z"
+    "timestamp": "2026-03-11T06:19:24.539Z",
+    "status": null
   },
   {
     "id": "mmlneuiztup7",
@@ -137,7 +630,8 @@
     "category": "invalid",
     "confidence": 0.2495337316385378,
     "source": "model",
-    "timestamp": "2026-03-11T06:18:55.115Z"
+    "timestamp": "2026-03-11T06:18:55.115Z",
+    "status": null
   },
   {
     "id": "mmlne5z60fhy",
@@ -147,7 +641,8 @@
     "category": "invalid",
     "confidence": 0.42709500036986053,
     "source": "model",
-    "timestamp": "2026-03-11T06:18:23.298Z"
+    "timestamp": "2026-03-11T06:18:23.298Z",
+    "status": null
   },
   {
     "id": "mmlmsagnipp9",
@@ -157,7 +652,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T06:01:22.679Z"
+    "timestamp": "2026-03-11T06:01:22.679Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlms6nlj7g6",
@@ -167,7 +663,8 @@
     "category": "invalid",
     "confidence": 0.3216883011661547,
     "source": "model",
-    "timestamp": "2026-03-11T06:01:17.745Z"
+    "timestamp": "2026-03-11T06:01:17.745Z",
+    "status": null
   },
   {
     "id": "mmlmq9ocw6wj",
@@ -177,7 +674,8 @@
     "category": "invalid",
     "confidence": 0.2307228803653226,
     "source": "model",
-    "timestamp": "2026-03-11T05:59:48.348Z"
+    "timestamp": "2026-03-11T05:59:48.348Z",
+    "status": null
   },
   {
     "id": "mmlmppy7psyr",
@@ -187,7 +685,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:59:22.783Z"
+    "timestamp": "2026-03-11T05:59:22.783Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlmpdujtypr",
@@ -197,7 +696,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:59:07.099Z"
+    "timestamp": "2026-03-11T05:59:07.099Z",
+    "status": "Open"
   },
   {
     "id": "mmlmod3fi4q2",
@@ -207,7 +707,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:58:19.467Z"
+    "timestamp": "2026-03-11T05:58:19.467Z",
+    "status": "Completed"
   },
   {
     "id": "mmlmochurpmu",
@@ -217,7 +718,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:58:18.690Z"
+    "timestamp": "2026-03-11T05:58:18.690Z",
+    "status": "Completed"
   },
   {
     "id": "mmlmj5ncuo9k",
@@ -227,7 +729,8 @@
     "category": "feedback",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:54:16.536Z"
+    "timestamp": "2026-03-11T05:54:16.536Z",
+    "status": null
   },
   {
     "id": "mmlmj0v51dwv",
@@ -237,7 +740,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:54:10.337Z"
+    "timestamp": "2026-03-11T05:54:10.337Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmlmish9w1sc",
@@ -247,7 +751,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-11T05:53:59.469Z"
+    "timestamp": "2026-03-11T05:53:59.469Z",
+    "status": "Open"
   },
   {
     "id": "mmlmilo1fsln",
@@ -277,7 +782,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T09:13:43.390Z"
+    "timestamp": "2026-03-10T09:13:43.390Z",
+    "status": null
   },
   {
     "id": "mmke6wpg55wh",
@@ -287,7 +793,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T09:13:01.972Z"
+    "timestamp": "2026-03-10T09:13:01.972Z",
+    "status": null
   },
   {
     "id": "mmke6rweulfa",
@@ -307,7 +814,8 @@
     "category": "invalid",
     "confidence": 0.2307228803653226,
     "source": "model",
-    "timestamp": "2026-03-10T08:54:14.800Z"
+    "timestamp": "2026-03-10T08:54:14.800Z",
+    "status": null
   },
   {
     "id": "mmkdilpt7oto",
@@ -317,7 +825,8 @@
     "category": "invalid",
     "confidence": 0.229751369430156,
     "source": "model",
-    "timestamp": "2026-03-10T08:54:07.985Z"
+    "timestamp": "2026-03-10T08:54:07.985Z",
+    "status": null
   },
   {
     "id": "mmkdii1zuwfi",
@@ -327,7 +836,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T08:54:03.239Z"
+    "timestamp": "2026-03-10T08:54:03.239Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmkdia0cdztr",
@@ -337,7 +847,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T08:53:52.812Z"
+    "timestamp": "2026-03-10T08:53:52.812Z",
+    "status": "Open"
   },
   {
     "id": "mmkdi4aevkxd",
@@ -357,7 +868,8 @@
     "category": "invalid",
     "confidence": 0.30972461992335437,
     "source": "model",
-    "timestamp": "2026-03-10T08:53:33.973Z"
+    "timestamp": "2026-03-10T08:53:33.973Z",
+    "status": null
   },
   {
     "id": "mmkabb8nbh1r",
@@ -367,7 +879,8 @@
     "category": "invalid",
     "confidence": 0.48745919732121656,
     "source": "model",
-    "timestamp": "2026-03-10T07:24:28.967Z"
+    "timestamp": "2026-03-10T07:24:28.967Z",
+    "status": null
   },
   {
     "id": "mmkab7tfsjk2",
@@ -377,7 +890,8 @@
     "category": "feedback",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:24.531Z"
+    "timestamp": "2026-03-10T07:24:24.531Z",
+    "status": null
   },
   {
     "id": "mmkab3ltm03a",
@@ -387,7 +901,8 @@
     "category": "inquiry",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:19.074Z"
+    "timestamp": "2026-03-10T07:24:19.074Z",
+    "status": "Not Answered"
   },
   {
     "id": "mmkaavkrbnm0",
@@ -397,7 +912,8 @@
     "category": "complaint",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:24:08.667Z"
+    "timestamp": "2026-03-10T07:24:08.667Z",
+    "status": "Open"
   },
   {
     "id": "mmkaan1olbdc",
@@ -407,6 +923,8 @@
     "category": "order",
     "confidence": 1,
     "source": "rule",
-    "timestamp": "2026-03-10T07:23:57.612Z"
+    "timestamp": "2026-03-10T07:23:57.612Z",
+    "status": "Completed",
+    "statusUpdatedAt": "2026-04-10T20:08:57.388Z"
   }
 ]
