@@ -428,18 +428,17 @@ return ""
 4. IMAGE PROMPT RULES
 ━━━━━━━━━━━━━━━━━━━
 
-Create a HIGH-END commercial AI poster prompt.
+Create a HIGH-END commercial AI photo prompt.
 
-The poster must visually reflect:
+The image must visually reflect:
 - business category
 - products/services
-- Indian festive mood if festival exists
-- offer visibility
+- Indian festive mood if festival exists (represented visually through decorations, lights, flowers)
 - warm local-business feeling
 
 STYLE:
 - Luxury commercial photography
-- Premium Instagram/WhatsApp marketing poster
+- Premium Instagram/WhatsApp marketing product shot
 - Cinematic lighting
 - Rich colors
 - Professional composition
@@ -448,41 +447,15 @@ STYLE:
 
 LAYOUT:
 - Product/business should be main focus
-- Offer text should be clearly visible
 - Keep clean negative space
-- Elegant typography placement
 - No clutter
 
-VERY IMPORTANT TYPOGRAPHY RULES:
-- ONLY use these exact texts:
-1. posterText
-2. festivalWish (optional)
+VERY IMPORTANT TEXT/TYPOGRAPHY RULES:
+- The image MUST NOT contain any text, letters, words, logo, typography, or overlays.
+- It must be a clean, text-free commercial photograph.
+- Include this EXACT instruction: "strictly text-free, clean product photography, no written text, no typography, no labels, no spelling errors, no gibberish letters, no text overlay."
 
-- NO extra text
-- NO paragraphs
-- NO random letters
-- NO gibberish
-- NO spelling mistakes
-- NO distorted typography
-
-Include this EXACT instruction:
-
-featuring ONLY the text:
-"${offer ? '\\${posterText}' : ''}"
-${festival ? 'and "\\${festivalWish}"' : ''}
-
-written in clean bold modern typography,
-perfect spelling,
-high readability,
-no extra words,
-no random characters,
-no gibberish text,
-no distorted letters.
-
-If there is NO festival and NO offer:
-Do NOT include any text on poster.
-
-The final poster should look like a professionally designed social media advertisement for WhatsApp and Instagram.
+The final image should look like a professionally shot social media advertisement for WhatsApp and Instagram.
 `;
 
   try {
