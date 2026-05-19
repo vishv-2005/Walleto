@@ -22,7 +22,7 @@ cd CatMod && pip install -r requirements.txt
 
 ```bash
 cd CatMod
-python main.py
+python train_final.py
 ```
 
 ### 3. Configure `.env`

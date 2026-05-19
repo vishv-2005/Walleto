@@ -49,6 +49,35 @@ function addMessage(msg) {
   saveMessages(messages);
 }
 
+// ── User File Storage ──────────────────────────────────────────────
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+
+function loadUsers() {
+  ensureDataDir();
+  if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]", "utf-8");
+  try {
+    return JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  ensureDataDir();
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+}
+
+// ── Category Normalization ─────────────────────────────────────────
+function normalizeCategory(cat) {
+  if (!cat) return "invalid";
+  const lower = cat.toLowerCase();
+  if (lower === "order" || lower === "ordering" || lower === "orders") return "orders";
+  if (lower === "complaint" || lower === "complaints") return "complaints";
+  if (lower === "inquiry" || lower === "inquiries") return "inquiries";
+  if (lower === "feedback") return "feedback";
+  return "invalid";
+}
+
 // ── Categorization via Python ──────────────────────────────────────
 function categorizeMessage(message) {
   return new Promise((resolve, reject) => {
@@ -131,13 +160,46 @@ app.post("/webhook", (req, res) => {
                 category: "pending",
                 confidence: 0,
                 source: "pending",
+                status: null,
                 timestamp: new Date().toISOString(),
               };
 
               // Categorize and update the record
               categorizeMessage(text)
                 .then((result) => {
-                  record.category = result.category || "invalid";
+                  // --- Fast-Track Inquiry Detection ---
+                  const inquiryRuleKeywords = ["price", "cost", "available", "when", "how", "where", "info", "details", "product"];
+                  const isInquiryRule = inquiryRuleKeywords.some(kw => text.toLowerCase().includes(kw));
+
+                  const category = isInquiryRule ? "inquiry" : (result.category || "invalid");
+                  
+                  // --- Order Update Detection Logic ---
+                  if (category === "order") {
+                    const updateKeywords = ["instead", "change", "update", "pack", "cancel", "replace", "nikal", "minus", "plus", "extra"];
+                    const isUpdate = updateKeywords.some(kw => text.toLowerCase().includes(kw));
+                    
+                    if (isUpdate) {
+                      const messages = loadMessages();
+                      // Find most recent pending/in-progress order from this sender
+                      const prevOrder = messages.find(m => 
+                        m.from === from && 
+                        normalizeCategory(m.category) === "orders" && 
+                        (m.status === "Pending" || m.status === "In Progress")
+                      );
+                      
+                      if (prevOrder) {
+                        console.log(`🔄 Updating message for ${from}: "${prevOrder.message}" -> "${text}"`);
+                        prevOrder.message = `${prevOrder.message} (UD: ${text})`;
+                        prevOrder.timestamp = new Date().toISOString(); // optional: bump timestamp
+                        saveMessages(messages);
+                        return; // Done, don't add as new message
+                      }
+                    }
+                  }
+
+                  record.category = category;
+                  const defaultStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
+                  record.status = defaultStatuses[category] !== undefined ? defaultStatuses[category] : null;
                   record.confidence = result.confidence || 0;
                   record.source = result.source || "unknown";
                   addMessage(record);
@@ -167,20 +229,53 @@ app.get("/api/messages", (req, res) => {
   res.json(messages);
 });
 
-// GET /api/stats — return summary counts
+// GET /api/stats — return summary counts grouped for frontend
 app.get("/api/stats", (req, res) => {
   const messages = loadMessages();
   const stats = {
+    version: "1.0.1",
     total: messages.length,
-    order: 0,
-    inquiry: 0,
-    complaint: 0,
-    feedback: 0,
-    invalid: 0,
+    orders: 0, orderPending: 0, orderInProgress: 0, orderCompleted: 0,
+    complaints: 0, complaintOpen: 0, complaintResolved: 0,
+    inquiries: 0, inquiryNotAnswered: 0, inquiryAnswered: 0,
+    feedback: 0, invalid: 0,
   };
   for (const m of messages) {
-    if (stats[m.category] !== undefined) stats[m.category]++;
+    const group = normalizeCategory(m.category);
+    if (stats.hasOwnProperty(group)) {
+      stats[group]++;
+    } else {
+      stats.invalid++;
+    }
+    
+    // Category-specific statuses
+    const norm = group.toLowerCase();
+    const st = (m.status || "").toLowerCase();
+    
+    if (norm.includes("order")) {
+      if (st.includes("completed")) stats.orderCompleted++;
+      else if (st.includes("progress")) stats.orderInProgress++;
+      else stats.orderPending++;
+    } else if (norm.includes("complaint")) {
+      if (st.includes("resolved")) stats.complaintResolved++;
+      else stats.complaintOpen++;
+    } else if (norm.includes("inquir")) {
+      const lowerSt = st.toLowerCase();
+      const lowerMsg = (m.message || "").toLowerCase();
+      
+      // Fast-Track Logic: If it contains inquiry keywords, treat as inquiry
+      const inquiryKeywords = ["price", "cost", "available", "when", "how", "where", "info", "details"];
+      const isForceInquiry = inquiryKeywords.some(kw => lowerMsg.includes(kw));
+
+      if (lowerSt === "answered" || lowerSt.includes("done")) {
+        stats.inquiryAnswered++;
+      } else {
+        stats.inquiryNotAnswered++;
+      }
+    }
   }
+  
+  stats.version = "1.0.3";
   res.json(stats);
 });
 
@@ -195,6 +290,7 @@ app.post("/categorize", async (req, res) => {
     const result = await categorizeMessage(message);
 
     // Also store it as a manually tested message
+    const defaultTestStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
     const record = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       from: "manual_test",
@@ -203,6 +299,7 @@ app.post("/categorize", async (req, res) => {
       category: result.category || "invalid",
       confidence: result.confidence || 0,
       source: result.source || "unknown",
+      status: defaultTestStatuses[result.category || "invalid"],
       timestamp: new Date().toISOString(),
     };
     addMessage(record);
@@ -217,6 +314,327 @@ app.post("/categorize", async (req, res) => {
 app.delete("/api/messages", (req, res) => {
   saveMessages([]);
   res.json({ status: "cleared" });
+});
+
+app.post("/api/generate-post", async (req, res) => {
+  const { businessDescription, festival, offer } = req.body;
+  if (!businessDescription || businessDescription.trim().length === 0) {
+    return res.status(400).json({ error: "Please enter a description for your business or product." });
+  }
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+
+  if (!geminiKey && !openaiKey) {
+    return res.status(400).json({
+      error: "AI Keys Missing: Please add GEMINI_API_KEY or OPENAI_API_KEY to your backend/.env file to generate posts."
+    });
+  }
+
+  const systemPrompt = `You are a professional local business copywriter and creative poster designer.
+Generate a marketing package based on these details:
+- Business Description: ${businessDescription}
+- Occasion/Festival: ${festival || "General Promotion"}
+- Offer/Discount: ${offer || "None"}
+
+You MUST return a raw JSON object with exactly two keys: "text" and "imagePrompt". Do not include any markdown formatting (like \`\`\`json).
+
+1. "text": Write a warm, authentic, heartfelt, and friendly WhatsApp broadcast post.
+   - Tone guidelines: DO NOT use typical AI marketing cliché words such as "delight", "elevate", "thrilled", "unlock", "delightful", "unveiling", "discover the magic", "revolutionize", "experience", "journey", "our promise".
+   - The tone must feel completely authentic, natural, and human—like a warm local shop owner welcoming a regular customer in person.
+   - Use bold headers (bold like *Header*), natural emojis, and clear paragraph spacing.
+   - Include a clear call-to-action (CTA) inviting the customer to reply directly to this message to place an order or ask any questions.
+
+2. "imagePrompt": A highly optimized, aesthetic prompt for an AI image generator (Pollinations AI / Flux) to create a beautiful marketing poster.
+   - Describe a high-quality, professional commercial product photograph (e.g. "a premium brass platter of Indian laddoos and sweets, decorated with small warm diyas and flower petals" or "freshly baked warm cookies on a marble slab") matching the business description.
+   - Specify ONLY ONE short text phrase (maximum 2-3 words, e.g. "30% OFF" or "LADDU LAND" or "HAPPY DIWALI") enclosed in double quotes to be written on the poster.
+   - Explicitly instruct the model: "featuring the exact text \\"[Your Short Text]\\", written in clean, bold, modern, perfectly spelled typography. No other random letters, no gibberish characters, no spelling mistakes."
+   - If there is no specific occasion or discount, do NOT include any text overlay in the imagePrompt at all. Instead, describe a premium, text-free professional product shot.
+
+Return ONLY the raw JSON.`;
+
+  try {
+    let rawText = "";
+
+    if (geminiKey) {
+      // Try multiple model and API version combinations to ensure success
+      const attempts = [
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-2.5-flash (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-2.0-flash (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
+          model: "gemini-flash-latest (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-1.5-flash (v1)"
+        }
+      ];
+
+      let lastError = null;
+      for (const attempt of attempts) {
+        try {
+          console.log(`Attempting Gemini generation using ${attempt.model}...`);
+          const response = await fetch(attempt.url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+          });
+          const data = await response.json();
+          if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            rawText = data.candidates[0].content.parts[0].text;
+            console.log(`Success with ${attempt.model}!`);
+            break;
+          } else {
+            lastError = data.error?.message || `Status ${response.status}`;
+            console.warn(`Failed ${attempt.model}: ${lastError}`);
+          }
+        } catch (err) {
+          lastError = err.message;
+          console.warn(`Error on ${attempt.model}: ${err.message}`);
+        }
+      }
+
+      if (!rawText) {
+        throw new Error(`Gemini API failed all attempts. Last error: ${lastError}`);
+      }
+    } else if (openaiKey) {
+      // Use OpenAI API
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: systemPrompt }]
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error?.message || "OpenAI API error");
+      }
+      rawText = data.choices?.[0]?.message?.content || "";
+    }
+
+    // Robust parsing of JSON payload
+    let generatedText = "";
+    let customImagePrompt = "";
+
+    rawText = rawText.trim();
+    const cleanJsonString = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    try {
+      const parsed = JSON.parse(cleanJsonString);
+      generatedText = parsed.text;
+      customImagePrompt = parsed.imagePrompt;
+    } catch (parseErr) {
+      // RegEx fallback
+      const jsonMatch = cleanJsonString.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          generatedText = parsed.text;
+          customImagePrompt = parsed.imagePrompt;
+        } catch (matchErr) {
+          console.error("JSON fallback parsing failed:", matchErr);
+        }
+      }
+    }
+
+    // Ultimate fallback if parsing failed completely
+    if (!generatedText) {
+      generatedText = rawText;
+    }
+
+    let finalImagePrompt = customImagePrompt;
+    if (!finalImagePrompt) {
+      // Fallback template
+      finalImagePrompt = `A premium marketing poster for ${businessDescription.toLowerCase().slice(0, 80)}${festival ? `, ${festival.toLowerCase()} themed` : ""}. Professional product photography, highly detailed, clean design.`;
+    }
+
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalImagePrompt)}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+
+    res.json({
+      text: generatedText,
+      imageUrl: imageUrl
+    });
+  } catch (err) {
+    console.error("AI Generation Error:", err.message);
+    res.status(500).json({ error: `AI Generation failed: ${err.message}` });
+  }
+});
+
+
+
+// ── Auth Endpoints ─────────────────────────────────────────────────
+
+app.post("/api/auth/signup", async (req, res) => {
+  const { email, password, name } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+  const users = loadUsers();
+  if (users.find(u => u.email === email.toLowerCase())) {
+    return res.status(409).json({ error: "Account already exists" });
+  }
+  users.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    email: email.toLowerCase(),
+    password,
+    name: name || "",
+    createdAt: new Date().toISOString(),
+  });
+  saveUsers(users);
+  res.json({ success: true, message: "Account created" });
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toLowerCase() && u.password === password);
+  if (!user) return res.status(401).json({ error: "Invalid email or password" });
+  res.json({ success: true, user: { id: user.id, email: user.email, name: user.name } });
+});
+
+// ── Categories CRUD ───────────────────────────────────────────────
+
+app.get("/api/categories", (req, res) => {
+  const messages = loadMessages();
+  const grouped = { orders: [], complaints: [], inquiries: [], feedback: [], invalid: [] };
+  for (const msg of messages) {
+    const group = normalizeCategory(msg.category);
+    grouped[group].push({
+      id: msg.id,
+      name: msg.message,
+      status: msg.status || (group === 'complaints' ? 'Open' : group === 'inquiries' ? 'Not Answered' : group === 'orders' ? 'Pending' : null),
+      from: msg.from,
+      contactName: msg.name,
+      confidence: msg.confidence,
+      source: msg.source,
+      originalCategory: msg.category,
+      timestamp: msg.timestamp,
+    });
+  }
+  res.json(grouped);
+});
+
+app.post("/api/categories/:category", async (req, res) => {
+  const { category } = req.params;
+  const { name, status } = req.body;
+  if (!name) return res.status(400).json({ error: "Name is required" });
+  const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", feedback: "feedback", others: "invalid", invalid: "invalid" };
+  const actualCat = catMap[category] || "invalid";
+  const catDefaultStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
+  const finalStatus = status !== undefined ? status : catDefaultStatuses[actualCat];
+  
+  const record = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    from: "manual_app",
+    name: "App User",
+    message: name,
+    category: actualCat,
+    confidence: 1,
+    source: "manual",
+    status: finalStatus,
+    timestamp: new Date().toISOString(),
+  };
+  addMessage(record);
+  res.json({ success: true, item: { id: record.id, name: record.message, status: record.status } });
+});
+
+app.put("/api/categories/:category/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, status } = req.body;
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (!msg) return res.status(404).json({ error: "Item not found" });
+  if (name !== undefined) msg.message = name;
+  if (status !== undefined) msg.status = status;
+  saveMessages(messages);
+  res.json({ success: true });
+});
+
+app.delete("/api/categories/:category/:id", async (req, res) => {
+  const { id } = req.params;
+  const messages = loadMessages();
+  saveMessages(messages.filter(m => m.id !== id));
+  res.json({ success: true });
+});
+
+// ── Messages Status Update ────────────────────────────────────────
+
+app.patch("/api/messages/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: "Status is required" });
+  
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (!msg) return res.status(404).json({ error: "Message not found" });
+  
+  msg.status = status;
+  msg.statusUpdatedAt = new Date().toISOString();
+  saveMessages(messages);
+  res.json({ success: true, id, status });
+});
+
+// ── Notifications ─────────────────────────────────────────────────
+
+app.get("/api/notifications", (req, res) => {
+  const messages = loadMessages();
+  const notifications = messages.slice(0, 30).map(msg => ({
+    id: msg.id,
+    text: `New ${normalizeCategory(msg.category).replace(/s$/, "")}: "${msg.message}"`,
+    from: msg.name || msg.from,
+    category: msg.category,
+    date: msg.timestamp,
+    done: msg.notificationRead || false,
+  }));
+  res.json(notifications);
+});
+
+app.put("/api/notifications/:id/read", async (req, res) => {
+  const { id } = req.params;
+  const messages = loadMessages();
+  const msg = messages.find(m => m.id === id);
+  if (msg) {
+    msg.notificationRead = !(msg.notificationRead || false);
+    saveMessages(messages);
+  }
+  res.json({ success: true });
+});
+
+// ── Profile ───────────────────────────────────────────────────────
+
+app.get("/api/profile", (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: "Email query param required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toString().toLowerCase());
+  if (!user) return res.status(404).json({ error: "User not found" });
+  res.json({ name: user.name || "", email: user.email });
+});
+
+app.put("/api/profile", async (req, res) => {
+  const { email, name, newEmail } = req.body;
+  if (!email) return res.status(400).json({ error: "Email required" });
+  const users = loadUsers();
+  const user = users.find(u => u.email === email.toLowerCase());
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (name !== undefined) user.name = name;
+  if (newEmail) user.email = newEmail.toLowerCase();
+  saveUsers(users);
+  res.json({ success: true });
 });
 
 // ── Debug / Diagnostic Page ────────────────────────────────────────
