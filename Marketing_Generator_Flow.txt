@@ -1,0 +1,115 @@
+================================================================================
+           WALLETO: AI MARKETING POST & BANNER GENERATION ENGINE
+                       FEATURE & FLOW DOCUMENTATION
+================================================================================
+
+This document provides a comprehensive breakdown of the AI-powered Marketing 
+Assistant feature in Walleto, including UI elements, API structure, system 
+prompts, image generation pipelines, and local device download mechanisms.
+
+---
+
+1. ARCHITECTURAL OVERVIEW
+--------------------------------------------------------------------------------
+The Marketing Assistant allows small business owners to instantly create custom, 
+localized WhatsApp broadcast messages and matching, text-free commercial 
+banner images.
+
+Visual Flow:
+[User Inputs] ──> [Node.js backend] ──> [Gemini API]
+                        |                  |
+                        |            (Returns JSON)
+                        v                  v
+                 [Image Prompt]     [WhatsApp Copy]
+                        |                  |
+              [Pollinations AI URL]        |
+                        v                  v
+                   [Banner JPG]            |
+                        \                  /
+                         v                v
+                       [Rendered in Mobile App]
+                       /                      \
+             [Native WhatsApp Share]    [Save to Device Gallery]
+
+---
+
+2. FRONTEND INPUT ELEMENTS (User Interface)
+--------------------------------------------------------------------------------
+Located in `frontend/app/(tabs)/post.tsx`, the UI comprises the following inputs:
+
+1. Business Description (Text Input):
+   - A multiline text area where the user describes their shop or product 
+     (e.g., "A sweet shop selling fresh organic mango peda and kaju katli").
+2. Occasion / Festival Selector (Horizontal Pill List):
+   - A scrollable pill list containing preset events:
+     - Diwali 🪔, Eid 🌙, Christmas 🎄, Holi 🎨, New Year 🎉
+     - Independence Day 🇮🇳, Raksha Bandhan 🤝
+     - Summer Special ☀️, Winter Collection ❄️
+     - None (General Promotion)
+3. Discount / Special Offer (Text Input - Optional):
+   - A short input for discount codes or deals (e.g., "20% off with code MANGO20").
+4. "Generate Marketing Post" Button:
+   - Starts loading indicators and initiates the backend API call.
+
+---
+
+3. BACKEND ROUTE & CORE LOGIC
+--------------------------------------------------------------------------------
+File Location: `backend/server.js` (`/api/generate-post` endpoint)
+
+When the endpoint is called, it executes the following steps:
+
+1. Prompt Engineering:
+   Constructs a detailed system prompt injecting the user's inputs:
+   - Copywriting Rules: 60-90 words max, single paragraph, warm, emotional, 
+     local-business tone (WhatsApp style). Explicitly bans generic AI marketing 
+     buzzwords like "elevate".
+   - Image Prompt Rules: Directs Gemini to generate a high-end commercial photo 
+     description matching the business type. Explicitly tells the model to keep 
+     the image strictly text-free to avoid gibberish overlays.
+2. Gemini Generation with Automatic Fallbacks:
+   The backend iterates through a prioritized list of Gemini models to handle 
+   rate limits and transient errors on the free tier:
+   - `gemini-2.5-flash (v1beta)` ──> `gemini-2.0-flash (v1beta)` ──> `gemini-flash-latest (v1beta)` ──> `gemini-1.5-flash (v1)`
+3. JSON Structure Parsing:
+   Gemini returns a raw JSON payload with this exact structure:
+   ```json
+   {
+     "text": "The warm marketing paragraph copy...",
+     "posterText": "Bold label (e.g. 20% OFF)",
+     "festivalWish": "Occasion wish (e.g. Happy Diwali)",
+     "imagePrompt": "Detailed commercial photography description..."
+   }
+   ```
+4. Banner Image URL Generation:
+   The backend retrieves the generated `imagePrompt` and constructs an asset link 
+   directing to the Pollinations AI (Flux) service:
+   `https://image.pollinations.ai/prompt/{imagePrompt}?width=800&height=800&nologo=true&seed={random_seed}`
+5. Final API Response:
+   Sends the processed JSON containing `{ text, imageUrl }` back to the mobile app.
+
+---
+
+4. FRONTEND OUTPUT & ACTION ELEMENTS
+--------------------------------------------------------------------------------
+Once the backend responds, the frontend renders the result card:
+
+1. Visual Banner Image:
+   - Displays the high-resolution, context-aware visual image.
+2. Download Banner Button:
+   - Action: Downloads the image locally.
+   - Mechanism: Uses `expo-file-system` to download the Pollinations AI image to 
+     the app's local directory, then uses `expo-media-library` to save it to 
+     the phone's gallery.
+   - Permission: Calls `MediaLibrary.requestPermissionsAsync(true)` with the 
+     writeOnly flag enabled to avoid crashing on newer Android devices by not 
+     requesting unused AUDIO or READ permissions.
+3. Share Post Button:
+   - Action: Opens the native OS sharing sheet allowing the user to copy or send 
+     the generated WhatsApp text.
+4. Send WhatsApp Button:
+   - Action: Launches WhatsApp directly with the pre-filled marketing text copy.
+   - Mechanism: Uses `Linking.openURL` with the `whatsapp://send` deep-link protocol, 
+     falling back to the `wa.me` web portal if the native app is not installed.
+
+================================================================================
