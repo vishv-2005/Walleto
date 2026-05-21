@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 // Android emulator uses 10.0.2.2 to reach host machine's localhost
 // iOS simulator and web use localhost directly
 const getBaseUrl = (): string => {
+  // For testing on a physical phone (with Expo Go), uncomment the line below:
+  return 'https://ample-babble-chowder.ngrok-free.dev';
   if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
   return 'http://localhost:5000';
 };
@@ -91,6 +93,14 @@ export async function categorizeMessage(message: string) {
   return request('/categorize', {
     method: 'POST',
     body: JSON.stringify({ message }),
+  });
+}
+
+// ── Marketing Post Generation ─────────────────────────────
+export async function generateMarketingPost(businessDescription: string, festival?: string, offer?: string) {
+  return request('/api/generate-post', {
+    method: 'POST',
+    body: JSON.stringify({ businessDescription, festival, offer }),
   });
 }
 

@@ -316,6 +316,272 @@ app.delete("/api/messages", (req, res) => {
   res.json({ status: "cleared" });
 });
 
+app.post("/api/generate-post", async (req, res) => {
+  const { businessDescription, festival, offer } = req.body;
+  if (!businessDescription || businessDescription.trim().length === 0) {
+    return res.status(400).json({ error: "Please enter a description for your business or product." });
+  }
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+
+  if (!geminiKey && !openaiKey) {
+    return res.status(400).json({
+      error: "AI Keys Missing: Please add GEMINI_API_KEY or OPENAI_API_KEY to your backend/.env file to generate posts."
+    });
+  }
+
+  const systemPrompt = `
+You are an expert Indian local-business marketing copywriter and visual campaign designer.
+
+Generate a COMPLETE marketing package for a small business.
+
+BUSINESS DETAILS:
+- Business: ${businessDescription}
+- Festival/Occasion: ${festival || "General Promotion"}
+- Offer: ${offer || "No Offer"}
+
+IMPORTANT:
+Return ONLY valid raw JSON.
+Do NOT use markdown.
+Do NOT wrap in \`\`\`.
+Do NOT explain anything.
+
+Return EXACTLY this structure:
+
+{
+  "text": "...",
+  "posterText": "...",
+  "festivalWish": "...",
+  "imagePrompt": "..."
+}
+
+━━━━━━━━━━━━━━━━━━━
+1. TEXT RULES
+━━━━━━━━━━━━━━━━━━━
+
+"text" must be:
+- ONLY ONE short paragraph
+- Maximum 60-90 words
+- Warm, human, emotional
+- Friendly local-business tone
+- Natural WhatsApp style
+- Easy to read
+
+IMPORTANT:
+- No long messages
+- No bullet points
+- No long formatting
+- No exaggerated marketing language
+- No corporate tone
+
+AVOID WORDS LIKE:
+"elevate"
+"unlock"
+"revolutionary"
+"discover"
+"journey"
+"delight"
+"thrilled"
+"premium experience"
+"unveiling"
+
+STYLE:
+- Sounds like a real shop owner
+- Add 2-3 natural emojis maximum
+- Mention festival naturally if available
+- Mention offer naturally if available
+- End with a simple CTA asking users to reply on WhatsApp
+
+━━━━━━━━━━━━━━━━━━━
+2. POSTER TEXT RULES
+━━━━━━━━━━━━━━━━━━━
+
+"posterText":
+- Maximum 3 words
+- Very short
+- Bold
+- Easy typography
+- Examples:
+  "30% OFF"
+  "Festive Sale"
+  "Sweet Moments"
+  "Diwali Offers"
+
+━━━━━━━━━━━━━━━━━━━
+3. FESTIVAL WISH RULES
+━━━━━━━━━━━━━━━━━━━
+
+"festivalWish":
+- Maximum 4 words
+- Warm and festive
+- Easy typography
+- Examples:
+  "Happy Diwali"
+  "Celebrate Together"
+  "Made With Love"
+
+If no festival exists:
+return ""
+
+━━━━━━━━━━━━━━━━━━━
+4. IMAGE PROMPT RULES
+━━━━━━━━━━━━━━━━━━━
+
+Create a HIGH-END commercial AI photo prompt.
+
+The image must visually reflect:
+- business category and specific products/services (e.g., if it is a sweet shop, show delicious Indian laddoos and peda; if it is an electronics shop, show premium gadgets or circuit boards).
+- Indian festive mood and theme if a festival exists (represented visually through decorations, e.g. warm glowing diyas, clay lamps, and marigold garlands for Diwali; colorful powders for Holi; festive lights for Christmas).
+- warm, inviting local-business feeling that feels authentic and authentic.
+- The prompt MUST describe a highly contextual, rich, atmospheric scene that integrates these visual elements naturally.
+
+STYLE:
+- Luxury commercial photography
+- Premium Instagram/WhatsApp marketing product shot
+- Cinematic lighting
+- Rich colors
+- Professional composition
+- Realistic details
+- Clean modern advertising aesthetic
+
+LAYOUT:
+- Product/business should be main focus
+- Keep clean negative space
+- No clutter
+
+VERY IMPORTANT TEXT/TYPOGRAPHY RULES:
+- The image MUST NOT contain any text, letters, words, logo, typography, or overlays.
+- It must be a clean, text-free commercial photograph.
+- Include this EXACT instruction: "strictly text-free, clean product photography, no written text, no typography, no labels, no spelling errors, no gibberish letters, no text overlay."
+
+The final image should look like a professionally shot social media advertisement for WhatsApp and Instagram.
+`;
+
+  try {
+    let rawText = "";
+
+    if (geminiKey) {
+      // Try multiple model and API version combinations to ensure success
+      const attempts = [
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-2.5-flash (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-2.0-flash (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
+          model: "gemini-flash-latest (v1beta)"
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-1.5-flash (v1)"
+        }
+      ];
+
+      let lastError = null;
+      for (const attempt of attempts) {
+        try {
+          console.log(`Attempting Gemini generation using ${attempt.model}...`);
+          const response = await fetch(attempt.url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+          });
+          const data = await response.json();
+          if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            rawText = data.candidates[0].content.parts[0].text;
+            console.log(`Success with ${attempt.model}!`);
+            break;
+          } else {
+            lastError = data.error?.message || `Status ${response.status}`;
+            console.warn(`Failed ${attempt.model}: ${lastError}`);
+          }
+        } catch (err) {
+          lastError = err.message;
+          console.warn(`Error on ${attempt.model}: ${err.message}`);
+        }
+      }
+
+      if (!rawText) {
+        throw new Error(`Gemini API failed all attempts. Last error: ${lastError}`);
+      }
+    } else if (openaiKey) {
+      // Use OpenAI API
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: systemPrompt }]
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error?.message || "OpenAI API error");
+      }
+      rawText = data.choices?.[0]?.message?.content || "";
+    }
+
+    // Robust parsing of JSON payload
+    let generatedText = "";
+    let customImagePrompt = "";
+
+    rawText = rawText.trim();
+    const cleanJsonString = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    try {
+      const parsed = JSON.parse(cleanJsonString);
+      generatedText = parsed.text;
+      customImagePrompt = parsed.imagePrompt;
+    } catch (parseErr) {
+      // RegEx fallback
+      const jsonMatch = cleanJsonString.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          generatedText = parsed.text;
+          customImagePrompt = parsed.imagePrompt;
+        } catch (matchErr) {
+          console.error("JSON fallback parsing failed:", matchErr);
+        }
+      }
+    }
+
+    // Ultimate fallback if parsing failed completely
+    if (!generatedText) {
+      generatedText = rawText;
+    }
+
+    let finalImagePrompt = customImagePrompt;
+    if (!finalImagePrompt) {
+      // Fallback template
+      finalImagePrompt = `A premium marketing poster for ${businessDescription.toLowerCase().slice(0, 80)}${festival ? `, ${festival.toLowerCase()} themed` : ""}. Professional product photography, highly detailed, clean design.`;
+    }
+
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalImagePrompt)}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+
+    res.json({
+      text: generatedText,
+      imageUrl: imageUrl
+    });
+  } catch (err) {
+    console.error("AI Generation Error:", err.message);
+    res.status(500).json({ error: `AI Generation failed: ${err.message}` });
+  }
+});
+
+
+
 // ── Auth Endpoints ─────────────────────────────────────────────────
 
 app.post("/api/auth/signup", async (req, res) => {

@@ -1,0 +1,163 @@
+================================================================================
+          WALLETO: HYBRID WHATSAPP MESSAGE CLASSIFICATION ENGINE
+                       MODEL & FLOW DOCUMENTATION
+================================================================================
+
+This document provides a comprehensive, end-to-end breakdown of the machine 
+learning model, dataset processing, feature extraction, hybrid classification 
+rules, and execution lifecycle powering the Walleto WhatsApp CRM platform.
+
+---
+
+1. ARCHITECTURAL OVERVIEW
+--------------------------------------------------------------------------------
+The Walleto Message Classification Engine uses a Hybrid ML-Rule-Based approach. 
+Instead of relying solely on Machine Learning (which can occasionally misclassify 
+highly specific phrases or emojis), it pairs a trained Linear Support Vector 
+Classifier (LinearSVC) with high-priority programmatic rule sets.
+
+Visual Flow:
+[Incoming Message] -> [Preprocessing & Clean] -> [Check Rule Engine] ──(Matched)──> [Rule Category]
+                             |                                                       |
+                        (No Match)                                                   |
+                             v                                                       v
+                   [Vectorization (TF-IDF)] -> [LinearSVC Model] -------------> [Final Category]
+
+---
+
+2. PREPROCESSING & CLEANING PIPELINE
+--------------------------------------------------------------------------------
+Incoming raw messages (often filled with Emojis, Hinglish, slang, and double letters) 
+undergo six pipeline steps before classification to ensure high consistency:
+
+1. Lowercasing: Normalizes letter cases.
+2. Emoji Mapping: Converts key visual emojis to text tags:
+   - 😡, 😠, 🤬 ──> "[angry]"
+   - 👍 ──> "[good]"
+   - 👌 ──> "[okay]"
+   - ✅ ──> "[done]"
+   - ❤️, 😍 ──> "[love]"
+   - 😊 ──> "[happy]"
+   - 😂, 🤣 ──> "[laugh]"
+   - 🙄, 😒 ──> "[annoyed]"
+   - 🙏 ──> "[please]"
+   - 🚚 ──> "[delivery]"
+   - 📦 ──> "[package]"
+   - ❓ ──> "[question]"
+   - ❌ ──> "[wrong]"
+   - 🙂 ──> "[happy]"
+3. Character Squashing: Repeated characters (e.g., "soooo", "fastttt") are 
+   shortened to prevent duplicate vocabulary tokens (e.g., "so", "fast").
+4. Punctuation Removal: Strips standard punctuation while keeping square brackets 
+   `[...]` intact for the emoji text tags.
+5. Slang & Hinglish Normalization: Standardizes casual text and Hinglish 
+   terms to english words:
+   - "u" ──> "you"     | "sir" ──> "professional" | "bhez" / "bhejo" ──> "send"
+   - "r" ──> "are"     | "kya" ──> "what"         | "kab" ──> "when"
+   - "pls"/"plz" ──> "please" | "hai" ──> "is"     | "kaise" ──> "how"
+   - "k"/"ok" ──> "okay"      | "ni"/"nahi"/"nahin" ──> "no" | "jaldi" ──> "fast"
+   - "thx"/"ty" ──> "thanks"  | "bhai"/"bro"/"yaar" ──> "friend"
+   - "kitna" ──> "how much"   | "batao" ──> "tell" | "dedo"/"dena"/"do" ──> "give"
+6. Whitespace Cleanup: Compresses multiple spaces down to a single space.
+
+---
+
+3. TRAINING DATASET SPECIFICATION
+--------------------------------------------------------------------------------
+The model was trained on a massive consolidated dataset of 22,709 examples, 
+consisting of three primary sources:
+1. Original Balanced Dataset (data_balanced.csv)
+2. High-Quality Hand-Crafted Seed Examples (training_data.py)
+3. Synthetic Data Additions (synthetic_data_15k.csv)
+
+Category Distribution in Training Set:
+- order (Orders and Logistics): 6,055 examples
+- inquiry (Questions / Pricing / Stock): 4,558 examples
+- complaint (Disappointment / Damaged / Late): 4,540 examples
+- invalid (Spam / Greetings / Too Short): 4,530 examples
+- feedback (Compliments / Appraisals): 3,026 examples
+
+---
+
+4. MACHINE LEARNING ENGINE: VECTORIZATION & CLASSIFICATION
+--------------------------------------------------------------------------------
+Feature Extraction: Hybrid Word + Char TF-IDF Vectorizer
+- To capture context, semantic meaning, and prevent out-of-vocabulary typos, 
+  Walleto uses a combined vectorization technique:
+  1. Word-level N-Grams: Extracting sequences of 1 to 3 words (`ngram_range=(1,3)`). 
+     Filters out standard English stop words.
+  2. Character-level N-Grams: Extracting sequences of 2 to 5 characters (`ngram_range=(2,5)`). 
+     This allows the model to match terms despite typos or suffix variations.
+
+Classification Model: Linear Support Vector Classifier (LinearSVC)
+- LinearSVC is highly effective for text classification task due to high performance 
+  with high-dimensional sparse matrices.
+- The training uses `class_weight='balanced'` to offset any class distribution 
+  imbalance and penalize misclassifications proportionally.
+
+---
+
+5. HYBRID RULE ENGINE (POST-PROCESSING OVERRIDES)
+--------------------------------------------------------------------------------
+To achieve near 100% precision for predictable everyday customer requests, 
+the classifier passes incoming messages through a structured priority rule 
+engine. 
+
+Priority Hierarchy (Highest to Lowest):
+1. COMPLAINT (Highest Priority Override)
+   - Triggers if the message contains keywords: "dont like", "not good", "bad", 
+     "worst", "issue", "problem", "hate", "delay", "late", "refund", "damage", 
+     "faulty", "wrong", "not received", "bakwas", "bekar".
+2. ORDER & LOGISTICS
+   - Triggers if the message contains order action verbs ("dedo", "bhejo", "pack", 
+     "confirm", "book", "give", "send", "change", "update", "cancel") OR 
+     shipping terms ("tracking", "status", "delivery", "kab tak", "kaha hai", 
+     "shipped", "track") OR a combination of a number and a product keyword 
+     (e.g., "cake", "pizza", "burger", "packet", "kg", "unit", "bottle", "box").
+3. INVALID / GREETING
+   - Triggers if the message is a common greeting ("hi", "hello", "ok", "namaste", 
+     "good morning", "good evening", "ram ram", "radhe radhe") OR is very short 
+     (less than or equal to 3 words) without containing inquiry keywords.
+4. INQUIRY
+   - Triggers if the message contains question words or shopping inquiries: 
+     "what", "price", "how", "details", "kitna", "kya", "cost", "paisa", 
+     "catalog", "discount", "offer", "rate", "inquiry".
+5. MACHINE LEARNING BASELINE (Lowest Priority)
+   - If no programmatic rule is matched, the final classification falls back to the 
+     LinearSVC model prediction.
+
+---
+
+6. ACCURACY & EVALUATION SUMMARY
+--------------------------------------------------------------------------------
+The final consolidated classifier was evaluated across three distinct datasets:
+
+* Training Accuracy (80% internal split of the 22K dataset): 98.66%
+* Validation Accuracy (20% internal split): 95.79%
+* External Real-world Test Accuracy (evaluating against unseen testset.csv): 74.80%
+
+Real-world Test Set Classification Details (Macro Average F1: 0.76):
+- Best Performing Class (Real-world): invalid (0.82 F1-score)
+- inquiry: 0.76 F1-score
+- order: 0.74 F1-score
+- complaint: 0.72 F1-score
+- feedback: (Generally merged or processed as general inquiries in raw testsets)
+
+---
+
+7. INTEGRATION FLOW & EXECUTION LIFECYCLE
+--------------------------------------------------------------------------------
+When a customer sends a WhatsApp message:
+1. The message hits the Node.js/Express server.
+2. The server spawns a Python subprocess executing `predict.py`.
+3. The Python script cleans the text using EMOJI_MAP and SLANG_MAP.
+4. The script loads the pickled model pipeline (`categorizer_final.pkl`).
+5. It runs `hybrid_classify` to evaluate rules followed by the model vectorizer.
+6. The script prints a JSON payload back to the Node.js process containing:
+   - "category": (e.g. "order", "inquiry", "complaint", "feedback", "invalid")
+   - "source": ("Rule-Based" or "ML-Model")
+   - "confidence": (1.0 for rules, 0.82 for model inference)
+   - "cleaned": (The preprocessed text)
+7. The backend updates the database and live updates the frontend client.
+
+================================================================================

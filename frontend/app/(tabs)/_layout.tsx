@@ -75,6 +75,16 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="post"
+        options={{
+          title: 'Post',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="megaphone-outline" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
