@@ -10,10 +10,13 @@ import {
   Alert,
   Image,
   Share,
-  Linking
+  Linking,
+  Platform
 } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
+import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeContext } from '../context/ThemeContext';
 import { generateMarketingPost } from '../services/api';
@@ -42,6 +45,8 @@ export default function PostGenerator() {
 
   const [generatedText, setGeneratedText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // 🤖 GENERATE POST
   const handleGenerate = async () => {
@@ -53,6 +58,8 @@ export default function PostGenerator() {
     setLoading(true);
     setGeneratedText('');
     setImageUrl('');
+    setImageError(false);
+    setImageLoading(false);
 
     try {
       const festivalValue = selectedFestival === 'None (General)' ? '' : selectedFestival;
@@ -62,7 +69,11 @@ export default function PostGenerator() {
         Alert.alert('Error', res.error);
       } else {
         setGeneratedText(res.text);
-        setImageUrl(res.imageUrl);
+        if (res.imageUrl) {
+          setImageLoading(true);
+          setImageError(false);
+          setImageUrl(res.imageUrl);
+        }
       }
     } catch (err: any) {
       Alert.alert('Generation Failed', err.message || 'An error occurred while generating.');
@@ -78,26 +89,36 @@ export default function PostGenerator() {
     setDownloading(true);
 
     try {
-      // 1. Request permissions (write-only to avoid requesting AUDIO on Android)
-      const { status } = await MediaLibrary.requestPermissionsAsync(true);
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'We need access to your photos to save the marketing banner.');
-        setDownloading(false);
-        return;
+      if (Platform.OS === 'web') {
+        // Web: fetch image as blob and trigger browser download
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `walleto_marketing_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+        Alert.alert('Success 🎉', 'Banner image download started!');
+      } else {
+        // Native: use expo-file-system + expo-media-library
+        const { status } = await MediaLibrary.requestPermissionsAsync(true);
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'We need access to your photos to save the marketing banner.');
+          setDownloading(false);
+          return;
+        }
+
+        const filename = `walleto_marketing_${Date.now()}.jpg`;
+        const fileUri = `${FileSystem.documentDirectory}${filename}`;
+        const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+        const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
+        await MediaLibrary.createAlbumAsync('Walleto Banners', asset, false);
+
+        Alert.alert('Success 🎉', 'Marketing banner saved to your gallery!');
       }
-
-      // 2. Generate a local file path
-      const filename = `walleto_marketing_${Date.now()}.jpg`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
-
-      // 3. Download the file from Pollinations AI
-      const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
-
-      // 4. Save to gallery
-      const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
-      await MediaLibrary.createAlbumAsync('Walleto Banners', asset, false);
-
-      Alert.alert('Success 🎉', 'Marketing banner saved to your gallery!');
     } catch (err: any) {
       Alert.alert('Download Failed', err.message || 'Could not save the image.');
     } finally {
@@ -108,29 +129,195 @@ export default function PostGenerator() {
   // 📢 SHARE POST
   const handleShare = async () => {
     try {
-      await Share.share({
-        message: generatedText,
-      });
+      if (!generatedText && !imageUrl) return;
+
+      // No image — just share text
+      if (!imageUrl) {
+        await Share.share({ message: generatedText });
+        return;
+      }
+
+      if (Platform.OS === 'web') {
+        // Try Web Share API first
+        if (navigator.share) {
+          try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const file = new File([blob], 'marketing.jpg', { type: blob.type });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: 'Walleto Marketing',
+                text: generatedText,
+                files: [file]
+              });
+              return;
+            }
+          } catch (e) {
+            console.log('Web share failed', e);
+          }
+        }
+        
+        // Fallback for Web — download image + copy text
+        await Clipboard.setStringAsync(generatedText);
+        window.alert('Text Copied! 📋\n\nThe marketing text is copied to your clipboard. Downloading the banner image now so you can share them both.');
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `walleto_marketing_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+        return;
+      }
+
+      // ─── Native (Android/iOS) ───
+      // 1) Download image to cache
+      const filename = `walleto_share_${Date.now()}.jpg`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+
+      // 2) Verify file exists
+      const fileInfo = await FileSystem.getInfoAsync(downloadResult.uri);
+      if (!fileInfo.exists) {
+        // Image download failed — fall back to text-only share
+        await Share.share({ message: generatedText });
+        return;
+      }
+
+      // 3) Copy text to clipboard
+      await Clipboard.setStringAsync(generatedText);
+
+      // 4) Open native share sheet with image
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        Alert.alert('Text Copied! 📋', 'Marketing text copied to clipboard. Now select where to share the banner image, then paste the text.');
+        await Sharing.shareAsync(downloadResult.uri, {
+          dialogTitle: 'Share Marketing Post',
+          mimeType: 'image/jpeg',
+          UTI: 'public.jpeg',
+        });
+      } else {
+        // Sharing not available — share text only
+        await Share.share({ message: generatedText });
+      }
     } catch (err: any) {
       console.log('Share error:', err.message);
+      // Last resort: share text only
+      try {
+        await Share.share({ message: generatedText });
+      } catch (e) {
+        Alert.alert('Share Failed', 'Could not share the post.');
+      }
     }
   };
 
   // 💬 WHATSAPP SHARE
-  const handleWhatsAppShare = () => {
-    const url = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
+  const handleWhatsAppShare = async () => {
+    try {
+      if (!generatedText && !imageUrl) return;
+
+      // No image — open WhatsApp directly with text
+      if (!imageUrl) {
+        if (Platform.OS === 'web') {
+          window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(generatedText)}`, '_blank');
         } else {
-          // Fallback to web link
-          return Linking.openURL(`https://wa.me/?text=${encodeURIComponent(generatedText)}`);
+          const waUrl = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+          const supported = await Linking.canOpenURL(waUrl);
+          if (supported) {
+            await Linking.openURL(waUrl);
+          } else {
+            await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(generatedText)}`);
+          }
         }
-      })
-      .catch((err) => {
-        Alert.alert('Error', 'Could not open WhatsApp');
-      });
+        return;
+      }
+
+      // Has image — need to share via share sheet
+      await Clipboard.setStringAsync(generatedText);
+
+      if (Platform.OS === 'web') {
+        // Web: download image + open WhatsApp Web
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `walleto_marketing_${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(generatedText)}`, '_blank');
+        return;
+      }
+
+      // ─── Native (Android/iOS) ───
+      // 1) Download image to cache
+      const filename = `walleto_wa_${Date.now()}.jpg`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+
+      // 2) Verify file
+      const fileInfo = await FileSystem.getInfoAsync(downloadResult.uri);
+      if (!fileInfo.exists) {
+        // Download failed — open WhatsApp with just text
+        const waUrl = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+        const supported = await Linking.canOpenURL(waUrl);
+        if (supported) {
+          await Linking.openURL(waUrl);
+        } else {
+          await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(generatedText)}`);
+        }
+        return;
+      }
+
+      // 3) Open share sheet — user picks WhatsApp from the list
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        Alert.alert(
+          'Text Copied! 📋',
+          'Marketing text copied to clipboard!\n\n1. Select WhatsApp from the share menu\n2. Pick your contacts\n3. Paste the text in the message box'
+        );
+        await Sharing.shareAsync(downloadResult.uri, {
+          dialogTitle: 'Share to WhatsApp',
+          mimeType: 'image/jpeg',
+          UTI: 'public.jpeg',
+        });
+      } else {
+        // Sharing not available — just open WhatsApp with text
+        const waUrl = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+        const supported = await Linking.canOpenURL(waUrl);
+        if (supported) {
+          await Linking.openURL(waUrl);
+        } else {
+          await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(generatedText)}`);
+        }
+      }
+    } catch (err: any) {
+      console.log('WA Share error:', err.message);
+      // Last resort: try opening WhatsApp with text
+      try {
+        const waUrl = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+        await Linking.openURL(waUrl);
+      } catch (e) {
+        Alert.alert('Share Failed', 'Could not open WhatsApp. Make sure WhatsApp is installed.');
+      }
+    }
+  };
+
+  // 🔄 RETRY IMAGE LOAD
+  const handleRetryImage = () => {
+    if (!imageUrl) return;
+    setImageError(false);
+    setImageLoading(true);
+    // Append a new seed to force a fresh image generation
+    const separator = imageUrl.includes('?') ? '&' : '?';
+    const newUrl = imageUrl.replace(/&seed=\d+/, '') + `&seed=${Math.floor(Math.random() * 100000)}`;
+    setImageUrl(newUrl);
   };
 
   // 🎨 THEME COLORS
@@ -234,18 +421,52 @@ export default function PostGenerator() {
           {/* Generated Banner Image */}
           {imageUrl && (
             <View style={styles.imageContainer}>
-              <Image source={{ uri: imageUrl }} style={styles.bannerImage} resizeMode="cover" />
-              <TouchableOpacity
-                style={styles.downloadIconBtn}
-                onPress={handleDownloadImage}
-                disabled={downloading}
-              >
-                {downloading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="download-outline" size={22} color="#fff" />
-                )}
-              </TouchableOpacity>
+              {imageLoading && (
+                <View style={styles.imageLoadingOverlay}>
+                  <ActivityIndicator size="large" color="#16a34a" />
+                  <Text style={[styles.imageLoadingText, { color: subText }]}>
+                    Generating banner image...{'\n'}This may take 10-20 seconds
+                  </Text>
+                </View>
+              )}
+
+              {imageError ? (
+                <View style={styles.imageErrorContainer}>
+                  <Ionicons name="image-outline" size={48} color={subText} />
+                  <Text style={[styles.imageErrorText, { color: subText }]}>
+                    Image failed to load
+                  </Text>
+                  <TouchableOpacity style={styles.retryBtn} onPress={handleRetryImage}>
+                    <Ionicons name="refresh-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+                    <Text style={styles.retryBtnText}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={styles.bannerImage}
+                  resizeMode="cover"
+                  onLoad={() => setImageLoading(false)}
+                  onError={() => {
+                    setImageLoading(false);
+                    setImageError(true);
+                  }}
+                />
+              )}
+
+              {!imageLoading && !imageError && (
+                <TouchableOpacity
+                  style={styles.downloadIconBtn}
+                  onPress={handleDownloadImage}
+                  disabled={downloading}
+                >
+                  {downloading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Ionicons name="download-outline" size={22} color="#fff" />
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -269,7 +490,7 @@ export default function PostGenerator() {
             </TouchableOpacity>
           </View>
 
-          {imageUrl && (
+          {imageUrl && !imageError && !imageLoading && (
             <TouchableOpacity
               style={[styles.downloadBtn, { borderColor: darkMode ? '#444' : '#ccc' }]}
               onPress={handleDownloadImage}
@@ -380,12 +601,53 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 16,
-    height: 250,
+    height: 280,
     backgroundColor: '#eee'
   },
   bannerImage: {
     width: '100%',
     height: '100%'
+  },
+  imageLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(245,245,245,0.9)',
+    zIndex: 10,
+  },
+  imageLoadingText: {
+    fontSize: 13,
+    marginTop: 12,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  imageErrorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(245,245,245,0.9)',
+  },
+  imageErrorText: {
+    fontSize: 14,
+    marginTop: 10,
+    marginBottom: 14,
+  },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#16a34a',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
   downloadIconBtn: {
     position: 'absolute',

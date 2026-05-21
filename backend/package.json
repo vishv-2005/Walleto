@@ -7,12 +7,19 @@
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["whatsapp", "categorization", "business"],
+  "keywords": [
+    "whatsapp",
+    "categorization",
+    "business"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.2"
   }
 }

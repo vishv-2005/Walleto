@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiLogin, apiSignup } from '../services/api';
+import { apiLogin, apiSignup, getStoredToken } from '../services/api';
 import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -28,8 +28,8 @@ export default function Auth() {
   useEffect(() => {
     (async () => {
       try {
-        const loggedIn = await AsyncStorage.getItem('loggedIn');
-        if (loggedIn === 'true') {
+        const token = await getStoredToken();
+        if (token) {
           router.replace('/(tabs)');
         }
       } catch (err) {
@@ -69,6 +69,7 @@ export default function Auth() {
       if (isLogin) {
         try {
           const result = await apiLogin(cleanedEmail, cleanedPassword);
+          // Token is stored automatically by apiLogin
           await AsyncStorage.setItem('loggedIn', 'true');
           await AsyncStorage.setItem('userEmail', cleanedEmail);
           if (result.user?.name) await AsyncStorage.setItem('name', result.user.name);
@@ -80,11 +81,14 @@ export default function Auth() {
         }
       } else {
         try {
-          await apiSignup(cleanedEmail, cleanedPassword);
-          Alert.alert('Success', 'Account created! Please login.');
-          setIsLogin(true);
+          const result = await apiSignup(cleanedEmail, cleanedPassword);
+          // Token is stored automatically by apiSignup — auto-login!
+          await AsyncStorage.setItem('loggedIn', 'true');
+          await AsyncStorage.setItem('userEmail', cleanedEmail);
+          if (result.user?.name) await AsyncStorage.setItem('name', result.user.name);
           setEmail('');
           setPassword('');
+          router.replace('/(tabs)');
         } catch (err: any) {
           setError(err.message || 'Signup failed. Try again.');
         }

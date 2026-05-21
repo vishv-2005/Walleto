@@ -12,7 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { ThemeContext } from '../context/ThemeContext';
-import { getProfile, updateProfile } from '../services/api';
+import { getProfile, updateProfile, apiLogout } from '../services/api';
 
 export default function Profile() {
 
@@ -80,7 +80,10 @@ export default function Profile() {
   // 🚪 LOGOUT
   const logout = async () => {
     try {
+      await apiLogout(); // Clear JWT token
       await AsyncStorage.removeItem('loggedIn');
+      await AsyncStorage.removeItem('userEmail');
+      await AsyncStorage.removeItem('name');
       router.replace('/auth');
     } catch (err) {
       console.log("Logout error:", err);

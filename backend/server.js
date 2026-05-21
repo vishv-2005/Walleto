@@ -5,6 +5,14 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+// Mongoose Models
+const User = require("./models/User");
+const Message = require("./models/Message");
+const authMiddleware = require("./middleware/auth");
 
 const app = express();
 app.use(cors());
@@ -17,6 +25,27 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, "public")));
+
+// ── MongoDB Connection ────────────────────────────────────────────
+let dbConnected = false;
+
+async function connectDB() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.warn("⚠️  MONGODB_URI not set — running with JSON file storage only");
+    return;
+  }
+  try {
+    await mongoose.connect(uri);
+    dbConnected = true;
+    console.log("✅ Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    console.warn("⚠️  Falling back to JSON file storage");
+  }
+}
+
+connectDB();
 
 // ── JSON File Storage ──────────────────────────────────────────────
 const DATA_DIR = path.join(__dirname, "data");
@@ -42,11 +71,17 @@ function saveMessages(messages) {
 }
 
 function addMessage(msg) {
+  // Always write to JSON (local fallback)
   const messages = loadMessages();
   messages.unshift(msg);
   // keep last 500 messages
   if (messages.length > 500) messages.length = 500;
   saveMessages(messages);
+
+  // Also write to MongoDB if connected
+  if (dbConnected) {
+    Message.create(msg).catch(err => console.error("MongoDB addMessage error:", err.message));
+  }
 }
 
 // ── User File Storage ──────────────────────────────────────────────
@@ -568,7 +603,11 @@ The final image should look like a professionally shot social media advertisemen
       finalImagePrompt = `A premium marketing poster for ${businessDescription.toLowerCase().slice(0, 80)}${festival ? `, ${festival.toLowerCase()} themed` : ""}. Professional product photography, highly detailed, clean design.`;
     }
 
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalImagePrompt)}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+    const seed = Math.floor(Math.random() * 100000);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalImagePrompt)}?width=800&height=800&nologo=true&seed=${seed}`;
+
+    // Return a proxy URL so the frontend fetches via our server (avoids CORS)
+    const imageUrl = `/api/proxy-image?url=${encodeURIComponent(pollinationsUrl)}`;
 
     res.json({
       text: generatedText,
@@ -580,6 +619,37 @@ The final image should look like a professionally shot social media advertisemen
   }
 });
 
+// ── Image Proxy (avoids CORS issues on web) ───────────────────────
+app.get("/api/proxy-image", async (req, res) => {
+  const targetUrl = req.query.url;
+  if (!targetUrl) return res.status(400).json({ error: "Missing url param" });
+
+  try {
+    console.log(`[Proxy] Fetching image: ${targetUrl.slice(0, 100)}...`);
+    const response = await fetch(targetUrl, {
+      headers: { 'Accept': 'image/*' },
+      redirect: 'follow',
+    });
+
+    if (!response.ok) {
+      console.error(`[Proxy] Upstream returned ${response.status}`);
+      return res.status(502).json({ error: `Image service returned ${response.status}` });
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+
+    // Stream the response body to the client
+    const arrayBuffer = await response.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
+    console.log(`[Proxy] Image served (${Math.round(arrayBuffer.byteLength / 1024)} KB)`);
+  } catch (err) {
+    console.error("[Proxy] Error:", err.message);
+    res.status(502).json({ error: `Image proxy failed: ${err.message}` });
+  }
+});
+
 
 
 // ── Auth Endpoints ─────────────────────────────────────────────────
@@ -587,28 +657,117 @@ The final image should look like a professionally shot social media advertisemen
 app.post("/api/auth/signup", async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password) return res.status(400).json({ error: "Email and password required" });
-  const users = loadUsers();
-  if (users.find(u => u.email === email.toLowerCase())) {
-    return res.status(409).json({ error: "Account already exists" });
+
+  try {
+    if (dbConnected) {
+      // MongoDB path
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) return res.status(409).json({ error: "Account already exists" });
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        name: name || "",
+      });
+
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        success: true,
+        message: "Account created",
+        token,
+        user: { id: user._id, email: user.email, name: user.name },
+      });
+    } else {
+      // JSON fallback
+      const users = loadUsers();
+      if (users.find(u => u.email === email.toLowerCase())) {
+        return res.status(409).json({ error: "Account already exists" });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      users.push({
+        id,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        name: name || "",
+        createdAt: new Date().toISOString(),
+      });
+      saveUsers(users);
+
+      const token = jwt.sign(
+        { id, email: email.toLowerCase() },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        success: true,
+        message: "Account created",
+        token,
+        user: { id, email: email.toLowerCase(), name: name || "" },
+      });
+    }
+  } catch (err) {
+    console.error("Signup error:", err.message);
+    res.status(500).json({ error: "Signup failed: " + err.message });
   }
-  users.push({
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    email: email.toLowerCase(),
-    password,
-    name: name || "",
-    createdAt: new Date().toISOString(),
-  });
-  saveUsers(users);
-  res.json({ success: true, message: "Account created" });
 });
 
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: "Email and password required" });
-  const users = loadUsers();
-  const user = users.find(u => u.email === email.toLowerCase() && u.password === password);
-  if (!user) return res.status(401).json({ error: "Invalid email or password" });
-  res.json({ success: true, user: { id: user.id, email: user.email, name: user.name } });
+
+  try {
+    if (dbConnected) {
+      // MongoDB path
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) return res.status(401).json({ error: "Invalid email or password" });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
+
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        success: true,
+        token,
+        user: { id: user._id, email: user.email, name: user.name },
+      });
+    } else {
+      // JSON fallback
+      const users = loadUsers();
+      const user = users.find(u => u.email === email.toLowerCase());
+      if (!user) return res.status(401).json({ error: "Invalid email or password" });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
+
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        success: true,
+        token,
+        user: { id: user.id, email: user.email, name: user.name },
+      });
+    }
+  } catch (err) {
+    console.error("Login error:", err.message);
+    res.status(500).json({ error: "Login failed: " + err.message });
+  }
 });
 
 // ── Categories CRUD ───────────────────────────────────────────────
@@ -666,6 +825,19 @@ app.put("/api/categories/:category/:id", async (req, res) => {
   if (name !== undefined) msg.message = name;
   if (status !== undefined) msg.status = status;
   saveMessages(messages);
+
+  // Also update MongoDB
+  if (dbConnected) {
+    try {
+      const updates = {};
+      if (name !== undefined) updates.message = name;
+      if (status !== undefined) updates.status = status;
+      await Message.findOneAndUpdate({ id: id }, updates);
+    } catch (err) {
+      console.error("MongoDB category update error:", err.message);
+    }
+  }
+
   res.json({ success: true });
 });
 
@@ -683,6 +855,7 @@ app.patch("/api/messages/:id/status", async (req, res) => {
   const { status } = req.body;
   if (!status) return res.status(400).json({ error: "Status is required" });
   
+  // Update JSON file
   const messages = loadMessages();
   const msg = messages.find(m => m.id === id);
   if (!msg) return res.status(404).json({ error: "Message not found" });
@@ -690,6 +863,19 @@ app.patch("/api/messages/:id/status", async (req, res) => {
   msg.status = status;
   msg.statusUpdatedAt = new Date().toISOString();
   saveMessages(messages);
+
+  // Also update MongoDB
+  if (dbConnected) {
+    try {
+      await Message.findOneAndUpdate(
+        { id: id },
+        { status: status, statusUpdatedAt: new Date().toISOString() }
+      );
+    } catch (err) {
+      console.error("MongoDB status update error:", err.message);
+    }
+  }
+
   res.json({ success: true, id, status });
 });
 
@@ -721,25 +907,50 @@ app.put("/api/notifications/:id/read", async (req, res) => {
 
 // ── Profile ───────────────────────────────────────────────────────
 
-app.get("/api/profile", (req, res) => {
+app.get("/api/profile", async (req, res) => {
   const email = req.query.email;
   if (!email) return res.status(400).json({ error: "Email query param required" });
-  const users = loadUsers();
-  const user = users.find(u => u.email === email.toString().toLowerCase());
-  if (!user) return res.status(404).json({ error: "User not found" });
-  res.json({ name: user.name || "", email: user.email });
+
+  try {
+    if (dbConnected) {
+      const user = await User.findOne({ email: email.toString().toLowerCase() });
+      if (!user) return res.status(404).json({ error: "User not found" });
+      return res.json({ name: user.name || "", email: user.email });
+    } else {
+      const users = loadUsers();
+      const user = users.find(u => u.email === email.toString().toLowerCase());
+      if (!user) return res.status(404).json({ error: "User not found" });
+      return res.json({ name: user.name || "", email: user.email });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.put("/api/profile", async (req, res) => {
   const { email, name, newEmail } = req.body;
   if (!email) return res.status(400).json({ error: "Email required" });
-  const users = loadUsers();
-  const user = users.find(u => u.email === email.toLowerCase());
-  if (!user) return res.status(404).json({ error: "User not found" });
-  if (name !== undefined) user.name = name;
-  if (newEmail) user.email = newEmail.toLowerCase();
-  saveUsers(users);
-  res.json({ success: true });
+
+  try {
+    if (dbConnected) {
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) return res.status(404).json({ error: "User not found" });
+      if (name !== undefined) user.name = name;
+      if (newEmail) user.email = newEmail.toLowerCase();
+      await user.save();
+      return res.json({ success: true });
+    } else {
+      const users = loadUsers();
+      const user = users.find(u => u.email === email.toLowerCase());
+      if (!user) return res.status(404).json({ error: "User not found" });
+      if (name !== undefined) user.name = name;
+      if (newEmail) user.email = newEmail.toLowerCase();
+      saveUsers(users);
+      return res.json({ success: true });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Debug / Diagnostic Page ────────────────────────────────────────
