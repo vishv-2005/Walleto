@@ -3,12 +3,7 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const getBaseUrl = (): string => {
-  if (Constants.expoConfig?.hostUri) {
-    const host = Constants.expoConfig.hostUri.split(':')[0];
-    return `http://${host}:5000`;
-  }
-  if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
-  return 'http://localhost:5000';
+  return 'https://walleto-v6ti.onrender.com';
 };
 
 export const API_BASE = getBaseUrl();

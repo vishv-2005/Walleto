@@ -1,5 +1,22 @@
 [
   {
+    "id": "mphda5gacydx",
+    "userId": "all",
+    "type": "order_update",
+    "title": "🛒 New Order Received",
+    "body": "Vishv Patel: \"I want 3 donuts\"",
+    "icon": "cart",
+    "data": {
+      "messageId": "mphda49n8cj9",
+      "category": "order",
+      "from": "918488045303",
+      "contactName": "Vishv Patel"
+    },
+    "read": true,
+    "priority": "high",
+    "createdAt": "2026-05-22T20:23:22.138Z"
+  },
+  {
     "id": "mpha4o87tx7z",
     "userId": "all",
     "type": "order_update",

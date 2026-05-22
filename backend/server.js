@@ -260,7 +260,8 @@ function categorizeMessage(message) {
   return new Promise((resolve, reject) => {
     const pythonScript = path.join(__dirname, "categorize.py");
 
-    const py = spawn("python", [pythonScript], {
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const py = spawn(pythonCmd, [pythonScript], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8" },
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
