@@ -349,7 +349,14 @@ app.post("/webhook", (req, res) => {
                   const inquiryRuleKeywords = ["price", "cost", "available", "when", "how", "where", "info", "details", "product"];
                   const isInquiryRule = inquiryRuleKeywords.some(kw => text.toLowerCase().includes(kw));
 
-                  const category = isInquiryRule ? "inquiry" : (result.category || "invalid");
+                  let category = result.category || "invalid";
+                  if (result.error) {
+                    category = "error_py"; 
+                    console.log(`[PYTHON ERROR] ${result.error}`);
+                    text = `(PyErr: ${result.error}) ` + text; // Prepend error to text so you see it in the UI
+                  } else if (isInquiryRule) {
+                    category = "inquiry";
+                  }
                   
                   // --- Order Update Detection Logic ---
                   if (category === "order") {
