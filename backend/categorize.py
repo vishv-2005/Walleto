@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_SCRIPT = (BASE_DIR.parent / "CatMod" / "predict.py").resolve()
 PY = sys.executable or "python"
 
-def predict_from_message(msg: str, timeout: int = 10) -> dict:
+def predict_from_message(msg: str, timeout: int = 60) -> dict:
     try:
         if not MODEL_SCRIPT.exists():
             return {"error": f"Model script not found: {MODEL_SCRIPT}"}

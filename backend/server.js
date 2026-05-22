@@ -353,7 +353,6 @@ app.post("/webhook", (req, res) => {
                   if (result.error) {
                     category = "error_py"; 
                     console.log(`[PYTHON ERROR] ${result.error}`);
-                    text = `(PyErr: ${result.error}) ` + text; // Prepend error to text so you see it in the UI
                   } else if (isInquiryRule) {
                     category = "inquiry";
                   }
