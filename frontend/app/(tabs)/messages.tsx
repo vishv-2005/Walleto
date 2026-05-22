@@ -1,180 +1,93 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { ThemeContext } from '../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown, FadeInRight, Layout } from 'react-native-reanimated';
 import { getMessages, updateMessageStatus } from '../services/api';
 
 type MessageItem = {
-  id: string;
-  from: string;
-  name: string;
-  message: string;
-  category: string;
-  status: string;
-  timestamp: string;
-  confidence?: number;
+  id: string; from: string; name: string; message: string;
+  category: string; status: string; timestamp: string; confidence?: number;
 };
-
 type CustomerGroup = {
-  from: string;
-  name: string;
-  messages: MessageItem[];
+  from: string; name: string; messages: MessageItem[];
   counts: { [key: string]: number };
 };
 
+const CAT_ICONS: Record<string, string> = {
+  order: 'cart', orders: 'cart', complaint: 'alert-circle', complaints: 'alert-circle',
+  inquiry: 'help-circle', inquiries: 'help-circle', feedback: 'star', invalid: 'close-circle',
+};
+
 export default function MessagesScreen() {
-  const { darkMode } = useContext(ThemeContext);
+  const { darkMode, t } = useContext(ThemeContext);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [customers, setCustomers] = useState<CustomerGroup[]>([]);
   const [selectedCustomerFrom, setSelectedCustomerFrom] = useState<string | null>(null);
-  const [showCompleted, setShowCompleted] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'All' | 'Needs Action' | 'In Progress' | 'Done'>('All');
   const params = useLocalSearchParams();
 
-  useEffect(() => {
-    if (params.customerFrom) {
-      setSelectedCustomerFrom(params.customerFrom as string);
-    }
-  }, [params.customerFrom]);
+  useEffect(() => { if (params.customerFrom) setSelectedCustomerFrom(params.customerFrom as string); }, [params.customerFrom]);
 
-  const bg = darkMode ? '#0f0f0f' : '#f5f7fa';
-  const card = darkMode ? '#1c1c1e' : '#fff';
-  const text = darkMode ? '#fff' : '#000';
-  const subText = darkMode ? '#9ca3af' : '#6b7280';
-  const border = darkMode ? '#2d2d2d' : '#e5e7eb';
+  const selectedCustomer = useMemo(() => customers.find(c => c.from === selectedCustomerFrom) || null, [customers, selectedCustomerFrom]);
 
-  // State-derived selected customer to avoid closure staleness
-  const selectedCustomer = useMemo(() => 
-    customers.find(c => c.from === selectedCustomerFrom) || null
-  , [customers, selectedCustomerFrom]);
+  const catColor = (cat: string) => {
+    const c = cat?.toLowerCase();
+    if (c?.includes('order')) return t.order;
+    if (c?.includes('complaint')) return t.complaint;
+    if (c?.includes('inquir')) return t.inquiry;
+    if (c === 'feedback') return t.feedback;
+    return t.invalid;
+  };
 
   const groupMessagesByCustomer = (messages: MessageItem[]) => {
     const groups: { [key: string]: CustomerGroup } = {};
-    
     messages.forEach((msg) => {
       const key = msg.from;
-      if (!groups[key]) {
-        groups[key] = {
-          from: msg.from,
-          name: msg.name || 'Unknown',
-          messages: [],
-          counts: {},
-        };
-      }
+      if (!groups[key]) groups[key] = { from: msg.from, name: msg.name || 'Unknown', messages: [], counts: {} };
       groups[key].messages.push(msg);
-      
       const cat = msg.category ? msg.category.toLowerCase() : 'others';
       groups[key].counts[cat] = (groups[key].counts[cat] || 0) + 1;
     });
-
-    return Object.values(groups).sort((a, b) => {
-      const timeA = new Date(a.messages[0].timestamp).getTime();
-      const timeB = new Date(b.messages[0].timestamp).getTime();
-      return timeB - timeA;
-    });
+    return Object.values(groups).sort((a, b) => new Date(b.messages[0].timestamp).getTime() - new Date(a.messages[0].timestamp).getTime());
   };
 
   const fetchData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
-    try {
-      const data = await getMessages();
-      const grouped = groupMessagesByCustomer(data);
-      setCustomers(grouped);
-    } catch (err) {
-      console.log('Error fetching messages:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    try { setCustomers(groupMessagesByCustomer(await getMessages())); }
+    catch { }
+    finally { setLoading(false); setRefreshing(false); }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData(true);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData(true);
-  };
+  useEffect(() => { fetchData(); const interval = setInterval(() => fetchData(true), 2000); return () => clearInterval(interval); }, [fetchData]);
 
   const handleStatusUpdate = async (msgId: string, currentStatus: string, category: string) => {
-    // Normalize case for comparison
-    const normalizedStatus = currentStatus.toLowerCase();
-    const cat = category.toLowerCase();
-    
-    let nextStatus = currentStatus;
-    
-    if (cat === 'orders' || cat === 'order') {
-      nextStatus = normalizedStatus === 'pending' ? 'In Progress' : 
-                   normalizedStatus === 'in progress' ? 'Completed' : 'Pending';
-    } else if (cat === 'complaints' || cat === 'complaint') {
-      nextStatus = normalizedStatus === 'open' ? 'Resolved' : 'Open';
-    } else if (cat === 'inquiries' || cat === 'inquiry') {
-      nextStatus = normalizedStatus === 'not answered' ? 'Answered' : 'Not Answered';
-    } else {
-      return; // no status for feedback/invalid
-    }
-    
-    // Optimistic UI update: update local state instantly
-    setCustomers(prevCustomers => {
-      return prevCustomers.map(customer => {
-        if (customer.messages.some(m => m.id === msgId)) {
-          return {
-            ...customer,
-            messages: customer.messages.map(m => 
-              m.id === msgId ? { ...m, status: nextStatus } : m
-            )
-          };
-        }
-        return customer;
-      });
-    });
-
-    try {
-      await updateMessageStatus(msgId, nextStatus);
-      // Silent refresh to sync with server's source of truth
-      setTimeout(() => fetchData(true), 500);
-    } catch (err) {
-      console.log('Error updating status:', err);
-      // Revert on error
-      fetchData(true);
-    }
+    const norm = currentStatus.toLowerCase(); const cat = category.toLowerCase();
+    let next = currentStatus;
+    if (cat.includes('order')) next = norm === 'pending' ? 'In Progress' : norm === 'in progress' ? 'Completed' : 'Pending';
+    else if (cat.includes('complaint')) next = norm === 'open' ? 'Resolved' : 'Open';
+    else if (cat.includes('inquir')) next = norm === 'not answered' ? 'Answered' : 'Not Answered';
+    else return;
+    setCustomers(prev => prev.map(c => ({ ...c, messages: c.messages.map(m => m.id === msgId ? { ...m, status: next } : m) })));
+    try { await updateMessageStatus(msgId, next); setTimeout(() => fetchData(true), 500); } catch { fetchData(true); }
   };
 
-  const getCategoryIcon = (category: string) => {
-    const cat = category.toLowerCase();
-    if (cat.includes('order')) return { name: 'cart' as const, color: '#22c55e' };
-    if (cat.includes('inquiry')) return { name: 'help-circle' as const, color: '#3b82f6' };
-    if (cat.includes('complaint')) return { name: 'alert-circle' as const, color: '#ef4444' };
-    if (cat.includes('feedback')) return { name: 'star' as const, color: '#f59e0b' };
-    if (cat.includes('invalid')) return { name: 'close-circle' as const, color: '#9ca3af' };
-    return { name: 'chatbubble' as const, color: '#9ca3af' };
+  const getStatusColor = (status: string) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'completed' || s === 'resolved' || s === 'answered') return t.success;
+    if (s === 'in progress') return '#F59E0B';
+    return t.muted;
   };
 
   const filteredMessages = useMemo(() => {
     if (!selectedCustomer) return [];
-    
-    let msgs = [...selectedCustomer.messages];
-    
-    // Always sort by timestamp descending (most recent first)
-    msgs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    // Apply status filter
+    let msgs = [...selectedCustomer.messages].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     if (statusFilter !== 'All') {
       msgs = msgs.filter(m => {
         const s = (m.status || '').toLowerCase();
@@ -184,160 +97,129 @@ export default function MessagesScreen() {
         return false;
       });
     }
-
     return msgs;
   }, [selectedCustomer, statusFilter]);
 
   if (loading && !refreshing && customers.length === 0) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: bg, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#22c55e" />
-      </SafeAreaView>
-    );
+    return <SafeAreaView style={{ flex: 1, backgroundColor: t.bg, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color={t.primary} /></SafeAreaView>;
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: bg }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }}>
       {selectedCustomerFrom ? (
-        // Chat View
         <View style={{ flex: 1 }}>
-          <View style={[styles.header, { borderBottomColor: border }]}>
-            <TouchableOpacity 
-              activeOpacity={0.7}
-              onPress={() => {
-                setSelectedCustomerFrom(null);
-                setShowCompleted(false);
-              }} 
-              style={styles.backButton}
-            >
-              <Ionicons name="arrow-back" size={26} color={text} />
+          {/* Chat Header */}
+          <View style={[st.header, { borderBottomColor: t.border, backgroundColor: t.bg }]}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => setSelectedCustomerFrom(null)} style={st.backButton}>
+              <Ionicons name="arrow-back" size={24} color={t.text} />
             </TouchableOpacity>
-            <View>
-              <Text style={[styles.headerTitle, { color: text }]}>{selectedCustomer?.name || 'Loading...'}</Text>
-              <Text style={[styles.headerSub, { color: subText }]}>{selectedCustomerFrom}</Text>
+            <View style={[st.headerAvatar, { backgroundColor: t.primary }]}>
+              <Text style={st.headerAvatarText}>{selectedCustomer?.name?.charAt(0)?.toUpperCase() || '?'}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[st.headerTitle, { color: t.text }]}>{selectedCustomer?.name || 'Loading...'}</Text>
+              <Text style={[st.headerSub, { color: t.subText }]}>{selectedCustomerFrom}</Text>
             </View>
           </View>
 
-          {/* Status Filter Bar */}
-          <View style={[styles.filterBar, { borderBottomColor: border }]}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-              {(['All', 'Needs Action', 'In Progress', 'Done'] as const).map((status) => (
-                <TouchableOpacity
-                  key={status}
-                  activeOpacity={0.7}
-                  onPress={() => setStatusFilter(status)}
-                  style={[
-                    styles.filterChip,
-                    { 
-                      backgroundColor: statusFilter === status ? '#22c55e' : (darkMode ? '#1c1c1e' : '#f3f4f6'),
-                      borderColor: statusFilter === status ? '#22c55e' : border
-                    }
-                  ]}
-                >
-                  <Text style={[
-                    styles.filterChipText, 
-                    { color: statusFilter === status ? '#fff' : subText }
-                  ]}>
-                    {status}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-          
-          <ScrollView 
-            style={{ flex: 1 }} 
-            contentContainerStyle={{ padding: 15, paddingBottom: 40 }}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#22c55e" />}
-          >
-            {/* Filtered Messages */}
-            {filteredMessages.map((msg) => (
-              <View key={msg.id} style={[styles.chatCard, { backgroundColor: card }]}>
-                <View style={styles.chatTop}>
-                  <View style={styles.badgeRow}>
-                    <View style={[styles.catBadge, { backgroundColor: getCategoryIcon(msg.category).color + '20' }]}>
-                      <Text style={{ color: getCategoryIcon(msg.category).color, fontSize: 10, fontWeight: '700' }}>
-                        {msg.category.toUpperCase()}
+          {/* Status Filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}
+            contentContainerStyle={st.filterScroll}
+            style={{ maxHeight: 52, borderBottomWidth: 0.5, borderBottomColor: t.border }}>
+            {(['All', 'Needs Action', 'In Progress', 'Done'] as const).map(status => (
+              <TouchableOpacity key={status} activeOpacity={0.7} onPress={() => setStatusFilter(status)}
+                style={[st.filterChip, {
+                  backgroundColor: statusFilter === status ? t.primary : t.cardAlt,
+                  borderColor: statusFilter === status ? t.primary : t.border,
+                }]}>
+                <Text style={[st.filterChipText, { color: statusFilter === status ? '#fff' : t.subText }]}>{status}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Messages */}
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15, paddingBottom: 40 }}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(true); }} tintColor={t.primary} />}>
+            {filteredMessages.map((msg, index) => {
+              const cc = catColor(msg.category);
+              const sc = getStatusColor(msg.status);
+              const isOlderThan30Days = (Date.now() - new Date(msg.timestamp).getTime()) > 30 * 24 * 60 * 60 * 1000;
+              return (
+                <Animated.View key={msg.id} entering={FadeInDown.delay(index * 30).springify()} layout={Layout.springify()}>
+                  <View style={[st.chatCard, { backgroundColor: t.card, borderColor: isOlderThan30Days ? t.error : t.border }]}>
+                    <View style={st.chatTop}>
+                      <View style={st.badgeRow}>
+                        <View style={[st.catBadge, { backgroundColor: `${cc}15` }]}>
+                          <Text style={{ color: cc, fontSize: 10, fontWeight: '700' }}>{msg.category?.toUpperCase()}</Text>
+                        </View>
+                        {!['feedback', 'invalid'].includes(msg.category?.toLowerCase()) && (
+                          <TouchableOpacity activeOpacity={0.6}
+                            onPress={() => handleStatusUpdate(msg.id, msg.status || '', msg.category)}
+                            style={[st.statusBadge, { borderColor: sc }]}>
+                            <Text style={{ color: sc, fontSize: 10, fontWeight: '700' }}>{msg.status || 'Pending'}</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                      <Text style={[st.chatDate, { color: t.muted }]}>
+                        {new Date(msg.timestamp).toLocaleDateString()} {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Text>
                     </View>
-                    {!['feedback', 'invalid'].includes(msg.category.toLowerCase()) && (
-                      <TouchableOpacity 
-                        activeOpacity={0.6}
-                        onPress={() => handleStatusUpdate(msg.id, msg.status || '', msg.category)}
-                        style={[styles.statusBadge, { borderColor: (msg.status === 'Completed' || msg.status === 'Resolved' || msg.status === 'Answered' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af') }]}
-                      >
-                        <Text style={{ color: (msg.status === 'Completed' || msg.status === 'Resolved' || msg.status === 'Answered' ? '#22c55e' : msg.status === 'In Progress' ? '#f59e0b' : '#9ca3af'), fontSize: 10, fontWeight: '700' }}>
-                          {msg.status || 'Pending'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
+                    <Text style={[st.chatText, { color: t.text }]}>{msg.message}</Text>
                   </View>
-                  <Text style={[styles.chatDate, { color: subText }]}>
-                    {new Date(msg.timestamp).toLocaleDateString()} {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </View>
-                <Text style={[styles.chatText, { color: text }]}>{msg.message}</Text>
-              </View>
-            ))}
-
+                </Animated.View>
+              );
+            })}
             {filteredMessages.length === 0 && (
               <View style={{ marginTop: 40, alignItems: 'center' }}>
-                <Ionicons name="filter-outline" size={40} color={subText} />
-                <Text style={{ color: subText, marginTop: 10 }}>No {statusFilter.toLowerCase()} messages</Text>
+                <Ionicons name="filter-outline" size={40} color={t.muted} />
+                <Text style={{ color: t.subText, marginTop: 10 }}>No {statusFilter.toLowerCase()} messages</Text>
               </View>
             )}
           </ScrollView>
         </View>
       ) : (
-        // Customer List View
-        <ScrollView 
-          style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 20 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#22c55e" />}
-        >
-          <Text style={[styles.title, { color: text }]}>Messages</Text>
-          
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(true); }} tintColor={t.primary} />}>
+          <Text style={[st.title, { color: t.text }]}>Messages</Text>
           {customers.length === 0 ? (
             <View style={{ marginTop: 40, alignItems: 'center' }}>
-              <Ionicons name="chatbubbles-outline" size={60} color={subText} />
-              <Text style={{ color: subText, marginTop: 15, fontSize: 16 }}>No activity yet</Text>
+              <View style={[st.emptyIcon, { backgroundColor: t.cardAlt }]}>
+                <Ionicons name="chatbubbles-outline" size={40} color={t.muted} />
+              </View>
+              <Text style={{ color: t.text, fontSize: 16, fontWeight: '600', marginTop: 16 }}>No activity yet</Text>
+              <Text style={{ color: t.subText, marginTop: 6, textAlign: 'center' }}>Messages will appear when customers send WhatsApp messages.</Text>
             </View>
           ) : (
-            customers.map((customer) => (
-              <TouchableOpacity 
-                activeOpacity={0.7}
-                key={customer.from} 
-                style={[styles.customerCard, { backgroundColor: card }]}
-                onPress={() => setSelectedCustomerFrom(customer.from)}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{customer.name.charAt(0).toUpperCase()}</Text>
-                </View>
-                
-                <View style={{ flex: 1, marginLeft: 15 }}>
-                  <Text style={[styles.customerName, { color: text }]}>{customer.name}</Text>
-                  <Text style={[styles.customerNumber, { color: subText }]}>{customer.from}</Text>
-                  
-                  <View style={styles.summaryStack}>
-                    {Object.entries(customer.counts).map(([cat, count]) => {
-                      const icon = getCategoryIcon(cat);
-                      return (
-                        <View key={cat} style={styles.summaryItem}>
-                          <Ionicons name={icon.name} size={14} color={icon.color} />
-                          <Text style={[styles.summaryCount, { color: text }]}>{count}</Text>
-                        </View>
-                      )
-                    })}
+            customers.map((customer, index) => (
+              <Animated.View key={customer.from} entering={FadeInDown.delay(index * 40).springify()}>
+                <TouchableOpacity activeOpacity={0.7}
+                  style={[st.customerCard, { backgroundColor: t.card, borderColor: t.border }]}
+                  onPress={() => setSelectedCustomerFrom(customer.from)}>
+                  <View style={[st.avatar, { backgroundColor: catColor(Object.keys(customer.counts)[0]) }]}>
+                    <Text style={st.avatarText}>{customer.name.charAt(0).toUpperCase()}</Text>
                   </View>
-                </View>
-                
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={[styles.lastTime, { color: subText }]}>
-                    {new Date(customer.messages[0].timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={18} color={subText} style={{ marginTop: 5 }} />
-                </View>
-              </TouchableOpacity>
+                  <View style={{ flex: 1, marginLeft: 14 }}>
+                    <Text style={[st.customerName, { color: t.text }]}>{customer.name}</Text>
+                    <Text style={[st.customerNumber, { color: t.subText }]}>{customer.from}</Text>
+                    <View style={st.summaryStack}>
+                      {Object.entries(customer.counts).map(([cat, count]) => (
+                        <View key={cat} style={[st.summaryItem, { backgroundColor: `${catColor(cat)}12` }]}>
+                          <Ionicons name={(CAT_ICONS[cat] || 'chatbubble') as any} size={12} color={catColor(cat)} />
+                          <Text style={[st.summaryCount, { color: catColor(cat) }]}>{count}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={[st.lastTime, { color: t.subText }]}>
+                      {new Date(customer.messages[0].timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </Text>
+                    <View style={[st.arrowWrap, { backgroundColor: t.cardAlt }]}>
+                      <Ionicons name="chevron-forward" size={14} color={t.subText} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
             ))
           )}
         </ScrollView>
@@ -346,92 +228,33 @@ export default function MessagesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 20 },
-  customerCard: {
-    flexDirection: 'row',
-    padding: 15,
-    borderRadius: 18,
-    marginBottom: 12,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#22c55e',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  customerName: { fontSize: 17, fontWeight: '600' },
-  customerNumber: { fontSize: 13, marginTop: 2 },
-  summaryStack: { flexDirection: 'row', marginTop: 8, gap: 10 },
-  summaryItem: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-  summaryCount: { fontSize: 11, fontWeight: '600' },
-  lastTime: { fontSize: 12 },
-  
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  backButton: { padding: 10, marginRight: 10, borderRadius: 20 },
-  headerTitle: { fontSize: 19, fontWeight: 'bold' },
-  headerSub: { fontSize: 12, opacity: 0.7 },
-  
-  chatCard: {
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 15,
-    elevation: 1,
-  },
-  chatTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' },
+const st = StyleSheet.create({
+  title: { fontSize: 28, fontWeight: '800', marginBottom: 16, letterSpacing: -0.5 },
+  customerCard: { flexDirection: 'row', padding: 14, borderRadius: 14, marginBottom: 10, alignItems: 'center', borderWidth: 1 },
+  avatar: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  customerName: { fontSize: 16, fontWeight: '600' },
+  customerNumber: { fontSize: 12, marginTop: 2 },
+  summaryStack: { flexDirection: 'row', marginTop: 8, gap: 8 },
+  summaryItem: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  summaryCount: { fontSize: 11, fontWeight: '700' },
+  lastTime: { fontSize: 11 },
+  arrowWrap: { width: 26, height: 26, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 6 },
+  emptyIcon: { width: 70, height: 70, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 0.5 },
+  backButton: { padding: 8, marginRight: 8, borderRadius: 20 },
+  headerAvatar: { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  headerAvatarText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  headerTitle: { fontSize: 17, fontWeight: '700' },
+  headerSub: { fontSize: 11, opacity: 0.7 },
+  filterScroll: { paddingHorizontal: 14, paddingVertical: 10, gap: 8 },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1 },
+  filterChipText: { fontSize: 12, fontWeight: '600' },
+  chatCard: { padding: 14, borderRadius: 14, marginBottom: 10, borderWidth: 1 },
+  chatTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, alignItems: 'center' },
   badgeRow: { flexDirection: 'row', gap: 8 },
-  catBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5, borderWidth: 1 },
-  chatDate: { fontSize: 11 },
-  chatText: { fontSize: 15, lineHeight: 22 },
-
-  aggrHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-  },
-  aggrTitle: { fontSize: 15, fontWeight: '600' },
-  
-  filterBar: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-  },
-  filterScroll: {
-    paddingHorizontal: 15,
-    gap: 10,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
+  catBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, borderWidth: 1 },
+  chatDate: { fontSize: 10 },
+  chatText: { fontSize: 14, lineHeight: 20 },
 });

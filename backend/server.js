@@ -8,10 +8,16 @@ const { spawn } = require("child_process");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const { Expo } = require("expo-server-sdk");
+
+// Create a new Expo SDK client
+let expo = new Expo();
 
 // Mongoose Models
 const User = require("./models/User");
 const Message = require("./models/Message");
+const Notification = require("./models/Notification");
 const authMiddleware = require("./middleware/auth");
 
 const app = express();
@@ -100,6 +106,142 @@ function loadUsers() {
 function saveUsers(users) {
   ensureDataDir();
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+}
+
+// ── Notification File Storage ─────────────────────────────────────
+const NOTIFICATIONS_FILE = path.join(DATA_DIR, "notifications.json");
+
+function loadNotifications() {
+  ensureDataDir();
+  if (!fs.existsSync(NOTIFICATIONS_FILE)) fs.writeFileSync(NOTIFICATIONS_FILE, "[]", "utf-8");
+  try {
+    return JSON.parse(fs.readFileSync(NOTIFICATIONS_FILE, "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveNotifications(notifications) {
+  ensureDataDir();
+  fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(notifications, null, 2), "utf-8");
+}
+
+// ── Create Notification Helper ────────────────────────────────────
+async function createNotification({ userId, type, title, body, icon, data, priority }) {
+  const notif = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    userId: userId || 'all',
+    type: type || 'system',
+    title: title || '',
+    body: body || '',
+    icon: icon || 'notifications',
+    data: data || {},
+    read: false,
+    priority: priority || 'medium',
+    createdAt: new Date().toISOString(),
+  };
+
+  // Save to JSON
+  const notifications = loadNotifications();
+  notifications.unshift(notif);
+  if (notifications.length > 1000) notifications.length = 1000;
+  saveNotifications(notifications);
+
+  // Save to MongoDB
+  if (dbConnected) {
+    try {
+      await Notification.create(notif);
+    } catch (err) {
+      console.error("MongoDB notification create error:", err.message);
+    }
+  }
+
+  // Send push notifications
+  try {
+    let tokens = [];
+    if (dbConnected) {
+      const users = await User.find({ pushToken: { $ne: null } });
+      tokens = users.map(u => u.pushToken);
+    } else {
+      const users = loadUsers();
+      tokens = users.filter(u => u.pushToken).map(u => u.pushToken);
+    }
+
+    let messages = [];
+    for (let pushToken of tokens) {
+      if (!Expo.isExpoPushToken(pushToken)) continue;
+      messages.push({
+        to: pushToken,
+        sound: 'default',
+        title: title || 'New Notification',
+        body: body || 'You have a new notification.',
+        data: data || {},
+      });
+    }
+
+    let chunks = expo.chunkPushNotifications(messages);
+    for (let chunk of chunks) {
+      expo.sendPushNotificationsAsync(chunk).catch(err => {
+        console.error("Error sending push notification chunk:", err);
+      });
+    }
+  } catch (err) {
+    console.error("Expo push notification error:", err.message);
+  }
+
+  return notif;
+}
+
+// ── Email Transporter (Nodemailer) ────────────────────────────────
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || '',
+  },
+});
+
+async function sendLoginEmail(userEmail, userName, loginTime, loginIp) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("⚠️  EMAIL_USER/EMAIL_PASS not set — skipping login email");
+    return;
+  }
+
+  const formattedTime = new Date(loginTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+  const mailOptions = {
+    from: `"Walleto Security" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    subject: '🔐 New Login to Walleto',
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; background: #0f0f0f; border-radius: 16px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 30px; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 24px;">🔐 Login Alert</h1>
+          <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">Walleto Security Notification</p>
+        </div>
+        <div style="padding: 30px; color: #e5e7eb;">
+          <p style="margin: 0 0 16px;">Hi <strong style="color: #fff;">${userName || 'there'}</strong>,</p>
+          <p style="margin: 0 0 20px;">A new login was detected on your Walleto account:</p>
+          <div style="background: #1c1c1e; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <p style="margin: 0 0 10px;">📧 <strong>Account:</strong> ${userEmail}</p>
+            <p style="margin: 0 0 10px;">🕐 <strong>Time:</strong> ${formattedTime}</p>
+            <p style="margin: 0;">🌐 <strong>IP:</strong> ${loginIp || 'Unknown'}</p>
+          </div>
+          <p style="margin: 0; color: #9ca3af; font-size: 13px;">If this wasn't you, please change your password immediately.</p>
+        </div>
+        <div style="padding: 16px 30px; background: #1c1c1e; text-align: center;">
+          <p style="margin: 0; color: #6b7280; font-size: 12px;">Walleto — WhatsApp Business Manager</p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await emailTransporter.sendMail(mailOptions);
+    console.log(`📧 Login email sent to ${userEmail}`);
+  } catch (err) {
+    console.error("📧 Login email failed:", err.message);
+  }
 }
 
 // ── Category Normalization ─────────────────────────────────────────
@@ -239,6 +381,24 @@ app.post("/webhook", (req, res) => {
                   record.source = result.source || "unknown";
                   addMessage(record);
                   console.log(`🎯 Categorized: [${record.category}] ${text}`);
+
+                  // Auto-create notification based on category
+                  const notifMap = {
+                    order: { type: 'order_update', title: '🛒 New Order Received', icon: 'cart', priority: 'high' },
+                    complaint: { type: 'complaint_alert', title: '🚨 New Complaint', icon: 'alert-circle', priority: 'high' },
+                    inquiry: { type: 'new_message', title: '❓ New Inquiry', icon: 'help-circle', priority: 'medium' },
+                    feedback: { type: 'new_message', title: '⭐ New Feedback', icon: 'star', priority: 'low' },
+                  };
+                  const notifInfo = notifMap[category] || { type: 'new_message', title: '💬 New Message', icon: 'chatbubble', priority: 'low' };
+                  createNotification({
+                    userId: 'all',
+                    type: notifInfo.type,
+                    title: notifInfo.title,
+                    body: `${contactName}: "${text.length > 80 ? text.slice(0, 80) + '...' : text}"`,
+                    icon: notifInfo.icon,
+                    data: { messageId: record.id, category, from, contactName },
+                    priority: notifInfo.priority,
+                  }).catch(err => console.error("Notification error:", err.message));
                 })
                 .catch((err) => {
                   console.error("❌ Categorization failed:", err.message);
@@ -500,20 +660,16 @@ The final image should look like a professionally shot social media advertisemen
       // Try multiple model and API version combinations to ensure success
       const attempts = [
         {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiKey}`,
+          model: "gemini-3.5-flash (v1beta)"
+        },
+        {
           url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
           model: "gemini-2.5-flash (v1beta)"
         },
         {
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-          model: "gemini-2.0-flash (v1beta)"
-        },
-        {
           url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
           model: "gemini-flash-latest (v1beta)"
-        },
-        {
-          url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-          model: "gemini-1.5-flash (v1)"
         }
       ];
 
@@ -655,7 +811,7 @@ app.get("/api/proxy-image", async (req, res) => {
 // ── Auth Endpoints ─────────────────────────────────────────────────
 
 app.post("/api/auth/signup", async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, businessName } = req.body;
   if (!email || !password) return res.status(400).json({ error: "Email and password required" });
 
   try {
@@ -669,6 +825,7 @@ app.post("/api/auth/signup", async (req, res) => {
         email: email.toLowerCase(),
         password: hashedPassword,
         name: name || "",
+        businessName: businessName || "",
       });
 
       const token = jwt.sign(
@@ -681,7 +838,7 @@ app.post("/api/auth/signup", async (req, res) => {
         success: true,
         message: "Account created",
         token,
-        user: { id: user._id, email: user.email, name: user.name },
+        user: { id: user._id, email: user.email, name: user.name, businessName: user.businessName },
       });
     } else {
       // JSON fallback
@@ -696,6 +853,7 @@ app.post("/api/auth/signup", async (req, res) => {
         email: email.toLowerCase(),
         password: hashedPassword,
         name: name || "",
+        businessName: businessName || "",
         createdAt: new Date().toISOString(),
       });
       saveUsers(users);
@@ -710,7 +868,7 @@ app.post("/api/auth/signup", async (req, res) => {
         success: true,
         message: "Account created",
         token,
-        user: { id, email: email.toLowerCase(), name: name || "" },
+        user: { id, email: email.toLowerCase(), name: name || "", businessName: businessName || "" },
       });
     }
   } catch (err) {
@@ -723,6 +881,9 @@ app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: "Email and password required" });
 
+  const loginIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'Unknown';
+  const loginTime = new Date();
+
   try {
     if (dbConnected) {
       // MongoDB path
@@ -732,11 +893,19 @@ app.post("/api/auth/login", async (req, res) => {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
+      // Track login
+      user.lastLoginAt = loginTime;
+      user.lastLoginIp = loginIp;
+      await user.save();
+
       const token = jwt.sign(
         { id: user._id, email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
+
+      // Send login email & create notification (async, don't block response)
+      sendLoginEmail(user.email, user.name, loginTime, loginIp).catch(() => {});
 
       return res.json({
         success: true,
@@ -752,11 +921,19 @@ app.post("/api/auth/login", async (req, res) => {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
+      // Track login
+      user.lastLoginAt = loginTime.toISOString();
+      user.lastLoginIp = loginIp;
+      saveUsers(users);
+
       const token = jwt.sign(
         { id: user.id, email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
+
+      // Send login email
+      sendLoginEmail(user.email, user.name, loginTime, loginIp).catch(() => {});
 
       return res.json({
         success: true,
@@ -770,24 +947,56 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// ── Push Token Endpoint ─────────────────────────────────────────────
+app.post("/api/push-token", async (req, res) => {
+  const { email, token } = req.body;
+  if (!email || !token) return res.status(400).json({ error: "Email and token required" });
+
+  try {
+    if (dbConnected) {
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (user) {
+        user.pushToken = token;
+        await user.save();
+      }
+    } else {
+      const users = loadUsers();
+      const user = users.find(u => u.email === email.toLowerCase());
+      if (user) {
+        user.pushToken = token;
+        saveUsers(users);
+      }
+    }
+    res.json({ success: true, message: "Push token registered" });
+  } catch (err) {
+    console.error("Push token register error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Categories CRUD ───────────────────────────────────────────────
 
 app.get("/api/categories", (req, res) => {
   const messages = loadMessages();
-  const grouped = { orders: [], complaints: [], inquiries: [], feedback: [], invalid: [] };
+  const grouped = { order: [], complaint: [], inquiry: [], feedback: [], invalid: [] };
   for (const msg of messages) {
     const group = normalizeCategory(msg.category);
-    grouped[group].push({
-      id: msg.id,
-      name: msg.message,
-      status: msg.status || (group === 'complaints' ? 'Open' : group === 'inquiries' ? 'Not Answered' : group === 'orders' ? 'Pending' : null),
-      from: msg.from,
-      contactName: msg.name,
-      confidence: msg.confidence,
-      source: msg.source,
-      originalCategory: msg.category,
-      timestamp: msg.timestamp,
-    });
+    const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", feedback: "feedback", invalid: "invalid" };
+    const targetCat = catMap[group] || "invalid";
+    
+    if (grouped[targetCat]) {
+      grouped[targetCat].push({
+        id: msg.id,
+        name: msg.message,
+        status: msg.status || (targetCat === 'complaint' ? 'Open' : targetCat === 'inquiry' ? 'Not Answered' : targetCat === 'order' ? 'Pending' : null),
+        from: msg.from,
+        contactName: msg.name,
+        confidence: msg.confidence,
+        source: msg.source,
+        originalCategory: msg.category,
+        timestamp: msg.timestamp,
+      });
+    }
   }
   res.json(grouped);
 });
@@ -796,10 +1005,14 @@ app.post("/api/categories/:category", async (req, res) => {
   const { category } = req.params;
   const { name, status } = req.body;
   if (!name) return res.status(400).json({ error: "Name is required" });
-  const catMap = { orders: "order", complaints: "complaint", inquiries: "inquiry", feedback: "feedback", others: "invalid", invalid: "invalid" };
-  const actualCat = catMap[category] || "invalid";
+  
+  // The frontend sends exactly 'order', 'complaint', 'inquiry', 'feedback', 'invalid'
+  const validCategories = ['order', 'complaint', 'inquiry', 'feedback', 'invalid'];
+  const actualCat = validCategories.includes(category) ? category : "invalid";
+  
   const catDefaultStatuses = { order: "Pending", complaint: "Open", inquiry: "Not Answered", feedback: null, invalid: null };
   const finalStatus = status !== undefined ? status : catDefaultStatuses[actualCat];
+
   
   const record = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -876,33 +1089,158 @@ app.patch("/api/messages/:id/status", async (req, res) => {
     }
   }
 
+  // Create status change notification
+  createNotification({
+    userId: 'all',
+    type: 'status_change',
+    title: '🔄 Status Updated',
+    body: `${normalizeCategory(msg.category)} "${msg.message?.slice(0, 50)}..." → ${status}`,
+    icon: 'checkmark-circle',
+    data: { messageId: id, category: msg.category, newStatus: status, from: msg.from },
+    priority: 'low',
+  }).catch(() => {});
+
   res.json({ success: true, id, status });
 });
 
-// ── Notifications ─────────────────────────────────────────────────
+// ── Notifications (Full CRUD) ─────────────────────────────────────
 
+// GET all notifications (with optional type/read filters)
 app.get("/api/notifications", (req, res) => {
-  const messages = loadMessages();
-  const notifications = messages.slice(0, 30).map(msg => ({
-    id: msg.id,
-    text: `New ${normalizeCategory(msg.category).replace(/s$/, "")}: "${msg.message}"`,
-    from: msg.name || msg.from,
-    category: msg.category,
-    date: msg.timestamp,
-    done: msg.notificationRead || false,
-  }));
+  const { type, read, limit } = req.query;
+  let notifications = loadNotifications();
+
+  if (type) {
+    notifications = notifications.filter(n => n.type === type);
+  }
+  if (read !== undefined) {
+    const isRead = read === 'true';
+    notifications = notifications.filter(n => n.read === isRead);
+  }
+
+  const maxItems = parseInt(limit) || 50;
+  notifications = notifications.slice(0, maxItems);
+
   res.json(notifications);
 });
 
-app.put("/api/notifications/:id/read", async (req, res) => {
+// GET unread count
+app.get("/api/notifications/unread-count", (req, res) => {
+  const notifications = loadNotifications();
+  const count = notifications.filter(n => !n.read).length;
+  res.json({ count });
+});
+
+// PUT mark single notification as read
+app.put("/api/notifications/:id/read", (req, res) => {
   const { id } = req.params;
-  const messages = loadMessages();
-  const msg = messages.find(m => m.id === id);
-  if (msg) {
-    msg.notificationRead = !(msg.notificationRead || false);
-    saveMessages(messages);
+  const notifications = loadNotifications();
+  const notif = notifications.find(n => n.id === id);
+  if (notif) {
+    notif.read = true;
+    saveNotifications(notifications);
+  }
+  if (dbConnected) {
+    Notification.findOneAndUpdate({ id }, { read: true }).catch(() => {});
   }
   res.json({ success: true });
+});
+
+// PUT mark ALL notifications as read
+app.put("/api/notifications/read-all", (req, res) => {
+  const notifications = loadNotifications();
+  notifications.forEach(n => n.read = true);
+  saveNotifications(notifications);
+  if (dbConnected) {
+    Notification.updateMany({}, { read: true }).catch(() => {});
+  }
+  res.json({ success: true });
+});
+
+// DELETE single notification
+app.delete("/api/notifications/:id", (req, res) => {
+  const { id } = req.params;
+  const notifications = loadNotifications();
+  saveNotifications(notifications.filter(n => n.id !== id));
+  if (dbConnected) {
+    Notification.findOneAndDelete({ id }).catch(() => {});
+  }
+  res.json({ success: true });
+});
+
+// DELETE all notifications
+app.delete("/api/notifications", (req, res) => {
+  saveNotifications([]);
+  if (dbConnected) {
+    Notification.deleteMany({}).catch(() => {});
+  }
+  res.json({ success: true });
+});
+
+// POST register push token
+app.post("/api/push-token", async (req, res) => {
+  const { email, token } = req.body;
+  if (!email || !token) return res.status(400).json({ error: "Email and token required" });
+  try {
+    if (dbConnected) {
+      await User.findOneAndUpdate({ email: email.toLowerCase() }, { pushToken: token });
+    }
+    // Also update JSON
+    const users = loadUsers();
+    const user = users.find(u => u.email === email.toLowerCase());
+    if (user) {
+      user.pushToken = token;
+      saveUsers(users);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT update notification preferences
+app.put("/api/notification-preferences", async (req, res) => {
+  const { email, preferences } = req.body;
+  if (!email || !preferences) return res.status(400).json({ error: "Email and preferences required" });
+  try {
+    if (dbConnected) {
+      await User.findOneAndUpdate(
+        { email: email.toLowerCase() },
+        { notificationPreferences: preferences }
+      );
+    }
+    const users = loadUsers();
+    const user = users.find(u => u.email === email.toLowerCase());
+    if (user) {
+      user.notificationPreferences = preferences;
+      saveUsers(users);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET notification preferences
+app.get("/api/notification-preferences", async (req, res) => {
+  const email = req.query.email;
+  if (!email) return res.status(400).json({ error: "Email required" });
+  const defaultPrefs = {
+    new_message: true, reminder: true, status_change: true,
+    login: true, complaint_alert: true, order_update: true,
+    system: true, email_on_login: true,
+  };
+  try {
+    if (dbConnected) {
+      const user = await User.findOne({ email: email.toLowerCase() });
+      return res.json(user?.notificationPreferences || defaultPrefs);
+    }
+    const users = loadUsers();
+    const user = users.find(u => u.email === email.toLowerCase());
+    return res.json(user?.notificationPreferences || defaultPrefs);
+  } catch (err) {
+    res.json(defaultPrefs);
+  }
 });
 
 // ── Profile ───────────────────────────────────────────────────────

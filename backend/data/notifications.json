@@ -1,0 +1,70 @@
+[
+  {
+    "id": "mpha4o87tx7z",
+    "userId": "all",
+    "type": "order_update",
+    "title": "🛒 New Order Received",
+    "body": "Vishv Patel: \"muje 2 pencil chahiye\\\"",
+    "icon": "cart",
+    "data": {
+      "messageId": "mpha4mh09ouw",
+      "category": "order",
+      "from": "918488045303",
+      "contactName": "Vishv Patel"
+    },
+    "read": true,
+    "priority": "high",
+    "createdAt": "2026-05-22T18:55:07.687Z"
+  },
+  {
+    "id": "mph9mbtxuoar",
+    "userId": "all",
+    "type": "status_change",
+    "title": "🔄 Status Updated",
+    "body": "orders \"i want 5 pencils...\" → In Progress",
+    "icon": "checkmark-circle",
+    "data": {
+      "messageId": "mph7x1n3nhah",
+      "category": "order",
+      "newStatus": "In Progress",
+      "from": "918488045303"
+    },
+    "read": true,
+    "priority": "low",
+    "createdAt": "2026-05-22T18:40:51.813Z"
+  },
+  {
+    "id": "mph7x4tzrp4o",
+    "userId": "all",
+    "type": "order_update",
+    "title": "🛒 New Order Received",
+    "body": "Vishv Patel: \"i want 5 pencils\"",
+    "icon": "cart",
+    "data": {
+      "messageId": "mph7x1n3nhah",
+      "category": "order",
+      "from": "918488045303",
+      "contactName": "Vishv Patel"
+    },
+    "read": true,
+    "priority": "high",
+    "createdAt": "2026-05-22T17:53:16.727Z"
+  },
+  {
+    "id": "mpgta0i8l76s",
+    "userId": "all",
+    "type": "new_message",
+    "title": "❓ New Inquiry",
+    "body": "Vishv Patel: \"what are the price of cycles\"",
+    "icon": "help-circle",
+    "data": {
+      "messageId": "mpgt9wdkn2dg",
+      "category": "inquiry",
+      "from": "918488045303",
+      "contactName": "Vishv Patel"
+    },
+    "read": true,
+    "priority": "medium",
+    "createdAt": "2026-05-22T11:03:23.408Z"
+  }
+]

@@ -3,14 +3,10 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const getBaseUrl = (): string => {
-  // Use Expo's hostUri to dynamically get the computer's local IP address (e.g. 192.168.x.x)
-  // This allows the Expo Go app on a physical phone to connect to the backend server.
   if (Constants.expoConfig?.hostUri) {
     const host = Constants.expoConfig.hostUri.split(':')[0];
     return `http://${host}:5000`;
   }
-  
-  // Fallbacks for simulators and web
   if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
   return 'http://localhost:5000';
 };
@@ -78,17 +74,29 @@ export async function apiLogin(email: string, password: string) {
   });
   if (data.token) {
     await storeAuth(data.token, data.user);
+    // Register push token
+    const { registerForPushNotificationsAsync } = require('./pushNotifications');
+    const pushToken = await registerForPushNotificationsAsync();
+    if (pushToken) {
+      await registerPushToken(email, pushToken).catch(console.error);
+    }
   }
   return data;
 }
 
-export async function apiSignup(email: string, password: string, name?: string) {
+export async function apiSignup(email: string, password: string, name?: string, businessName?: string) {
   const data = await request('/api/auth/signup', {
     method: 'POST',
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify({ email, password, name, businessName }),
   });
   if (data.token) {
     await storeAuth(data.token, data.user);
+    // Register push token
+    const { registerForPushNotificationsAsync } = require('./pushNotifications');
+    const pushToken = await registerForPushNotificationsAsync();
+    if (pushToken) {
+      await registerPushToken(email, pushToken).catch(console.error);
+    }
   }
   return data;
 }
@@ -153,22 +161,58 @@ export async function generateMarketingPost(businessDescription: string, festiva
     method: 'POST',
     body: JSON.stringify({ businessDescription, festival, offer }),
   });
-  // The server returns a relative imageUrl like /api/proxy-image?...
-  // Prepend the base URL so the Image component can load it
   if (result.imageUrl && result.imageUrl.startsWith('/')) {
     result.imageUrl = `${API_BASE}${result.imageUrl}`;
   }
   return result;
 }
 
-// ── Notifications ────────────────────────────────────────
-export async function getNotifications() {
-  return request('/api/notifications');
+// ── Notifications (New System) ───────────────────────────
+export async function getNotifications(filters?: { type?: string; read?: boolean; limit?: number }) {
+  const params = new URLSearchParams();
+  if (filters?.type) params.append('type', filters.type);
+  if (filters?.read !== undefined) params.append('read', String(filters.read));
+  if (filters?.limit) params.append('limit', String(filters.limit));
+  const query = params.toString();
+  return request(`/api/notifications${query ? `?${query}` : ''}`);
 }
 
-export async function toggleNotificationRead(id: string) {
-  return request(`/api/notifications/${id}/read`, {
+export async function getUnreadNotificationCount() {
+  return request('/api/notifications/unread-count');
+}
+
+export async function markNotificationRead(id: string) {
+  return request(`/api/notifications/${id}/read`, { method: 'PUT' });
+}
+
+export async function markAllNotificationsRead() {
+  return request('/api/notifications/read-all', { method: 'PUT' });
+}
+
+export async function deleteNotification(id: string) {
+  return request(`/api/notifications/${id}`, { method: 'DELETE' });
+}
+
+export async function deleteAllNotifications() {
+  return request('/api/notifications', { method: 'DELETE' });
+}
+
+export async function registerPushToken(email: string, token: string) {
+  return request('/api/push-token', {
+    method: 'POST',
+    body: JSON.stringify({ email, token }),
+  });
+}
+
+// ── Notification Preferences ─────────────────────────────
+export async function getNotificationPreferences(email: string) {
+  return request(`/api/notification-preferences?email=${encodeURIComponent(email)}`);
+}
+
+export async function updateNotificationPreferences(email: string, preferences: Record<string, boolean>) {
+  return request('/api/notification-preferences', {
     method: 'PUT',
+    body: JSON.stringify({ email, preferences }),
   });
 }
 
