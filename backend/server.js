@@ -195,11 +195,16 @@ async function createNotification({ userId, type, title, body, icon, data, prior
 
 // ── Email Transporter (Nodemailer) ────────────────────────────────
 const emailTransporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  family: 4, // Force IPv4 — Render blocks outbound IPv6
   auth: {
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
 });
 
 async function sendLoginEmail(userEmail, userName, loginTime, loginIp) {
