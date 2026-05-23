@@ -194,22 +194,30 @@ async function createNotification({ userId, type, title, body, icon, data, prior
 }
 
 // ── Email Transporter (Nodemailer) ────────────────────────────────
-const emailTransporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  family: 4, // Force IPv4 — Render blocks outbound IPv6
-  auth: {
-    user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASS || '',
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
+const dns = require("dns");
+let emailTransporter = null;
+
+// Pre-resolve smtp.gmail.com to IPv4 so Render never tries IPv6
+dns.resolve4("smtp.gmail.com", (err, addresses) => {
+  const smtpHost = (!err && addresses && addresses.length) ? addresses[0] : "smtp.gmail.com";
+  console.log(`📧 SMTP resolved to IPv4: ${smtpHost}`);
+  emailTransporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: 465,
+    secure: true,
+    tls: { servername: "smtp.gmail.com" }, // TLS cert must validate against hostname
+    auth: {
+      user: process.env.EMAIL_USER || "",
+      pass: process.env.EMAIL_PASS || "",
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+  });
 });
 
 async function sendLoginEmail(userEmail, userName, loginTime, loginIp) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("⚠️  EMAIL_USER/EMAIL_PASS not set — skipping login email");
+  if (!emailTransporter || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("⚠️  Email transporter not ready or EMAIL_USER/EMAIL_PASS not set — skipping login email");
     return;
   }
 
@@ -251,7 +259,7 @@ async function sendLoginEmail(userEmail, userName, loginTime, loginIp) {
 }
 
 async function sendSignupEmail(userEmail, userName, signupTime, signupIp) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
+  if (!emailTransporter || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
   const formattedTime = new Date(signupTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
   const mailOptions = {
     from: `"Walleto Security" <${process.env.EMAIL_USER}>`,
