@@ -1,5 +1,6 @@
 // server.js — Walleto WhatsApp Message Categorizer
 require("dotenv").config();
+require("dns").setDefaultResultOrder("ipv4first"); // Fix Render IPv6 Nodemailer timeout
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -241,6 +242,42 @@ async function sendLoginEmail(userEmail, userName, loginTime, loginIp) {
     console.log(`📧 Login email sent to ${userEmail}`);
   } catch (err) {
     console.error("📧 Login email failed:", err.message);
+  }
+}
+
+async function sendSignupEmail(userEmail, userName, signupTime, signupIp) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
+  const formattedTime = new Date(signupTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  const mailOptions = {
+    from: `"Walleto Security" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    subject: '🎉 Welcome to Walleto!',
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; background: #0f0f0f; border-radius: 16px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); padding: 30px; text-align: center;">
+          <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 Welcome!</h1>
+          <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">Your Walleto Account is Ready</p>
+        </div>
+        <div style="padding: 30px; color: #e5e7eb;">
+          <p style="margin: 0 0 16px;">Hi <strong style="color: #fff;">${userName || 'there'}</strong>,</p>
+          <p style="margin: 0 0 20px;">Welcome to Walleto! We're excited to help you manage your WhatsApp business automatically.</p>
+          <div style="background: #1c1c1e; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <p style="margin: 0 0 10px;">📧 <strong>Account:</strong> ${userEmail}</p>
+            <p style="margin: 0 0 10px;">🕐 <strong>Signed Up:</strong> ${formattedTime}</p>
+            <p style="margin: 0;">🌐 <strong>IP:</strong> ${signupIp || 'Unknown'}</p>
+          </div>
+        </div>
+        <div style="padding: 16px 30px; background: #1c1c1e; text-align: center;">
+          <p style="margin: 0; color: #6b7280; font-size: 12px;">Walleto — WhatsApp Business Manager</p>
+        </div>
+      </div>
+    `,
+  };
+  try {
+    await emailTransporter.sendMail(mailOptions);
+    console.log(`📧 Signup email sent to ${userEmail}`);
+  } catch (err) {
+    console.error("📧 Signup email failed:", err.message);
   }
 }
 
@@ -841,6 +878,9 @@ app.post("/api/auth/signup", async (req, res) => {
         { expiresIn: "7d" }
       );
 
+      const signupIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'Unknown';
+      sendSignupEmail(user.email, user.name, new Date(), signupIp).catch(() => {});
+
       return res.json({
         success: true,
         message: "Account created",
@@ -870,6 +910,9 @@ app.post("/api/auth/signup", async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
+
+      const signupIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'Unknown';
+      sendSignupEmail(email.toLowerCase(), name || "", new Date(), signupIp).catch(() => {});
 
       return res.json({
         success: true,
